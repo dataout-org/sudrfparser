@@ -879,6 +879,8 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
     except WebDriverException:
         results = f"{website} cannot be parsed. Web driver error"
     
+    browser.close()
+    
     return results
 
 
