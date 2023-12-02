@@ -4,6 +4,7 @@ import urllib
 import re
 import time
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 
 ###
@@ -151,6 +152,8 @@ def get_cases_by_keywords(path_to_driver:str, keywords:list, start_date:str, end
                         result_list = soup.find("ul",{"id":"resultsList"}).find_all("li")
                         for li in result_list:
                             all_links.append(li.find("a",{"class":"resultHeader"})["href"])
+
+                #TO-DO: save all links per keyword in a separate file
 
                 # opening cases in a new tab
 
