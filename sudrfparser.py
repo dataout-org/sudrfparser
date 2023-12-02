@@ -69,8 +69,11 @@ def _explicit_wait(browser,by:str,element:str,sec:int) -> bool:
             element = WebDriverWait(browser,sec).until(EC.presence_of_element_located((By.ID, element)))
             if element:
                 element_found = True
+                
         if by == 'CLASS_NAME':
             element = WebDriverWait(browser,sec).until(EC.visibility_of_element_located((By.CLASS_NAME, element)))
+            if element:
+                element_found = True
     except:
         element_found = False
         

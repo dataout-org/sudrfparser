@@ -1,2 +1,4 @@
 
 .DS_Store
+__pycache__/bsr_parser.cpython-36.pyc
+__pycache__/sudrfparser.cpython-36.pyc
