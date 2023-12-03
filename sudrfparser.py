@@ -69,7 +69,7 @@ def _explicit_wait(browser,by:str,element:str,sec:int) -> bool:
             element = WebDriverWait(browser,sec).until(EC.presence_of_element_located((By.ID, element)))
             if element:
                 element_found = True
-                
+
         if by == 'CLASS_NAME':
             element = WebDriverWait(browser,sec).until(EC.visibility_of_element_located((By.CLASS_NAME, element)))
             if element:
@@ -386,7 +386,6 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                 results_per_site[website]["num_cases"] = num_cases
                 results_per_site[website]["cases"] = list_of_cases
                 results_per_site[website]["logs"] = logs
-                print("Table not found")
                     
             # if there is a table with results
             else:
