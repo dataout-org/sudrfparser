@@ -555,7 +555,7 @@
         {
             "court_id": "22RS0071",
             "court_name": "Яровской районный суд (Алтайский край)",
-            "court_website": "http://yarovsky.alt.sudrf.ru/",
+            "court_website": "http://yarovsky.alt.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -565,7 +565,7 @@
         {
             "court_id": "28OS0000",
             "court_name": "Амурский областной суд (Амурская область)",
-            "court_website": "http://oblsud.amr.sudrf.ru/",
+            "court_website": "http://oblsud.amr.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -606,7 +606,7 @@
         {
             "court_id": "28RS0004",
             "court_name": "Благовещенский городской суд (Амурская область)",
-            "court_website": "http://blag-gs.amr.sudrf.ru/",
+            "court_website": "http://blag-gs.amr.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -864,7 +864,7 @@
         {
             "court_id": "29RS0014",
             "court_name": "Ломоносовский районный суд г. Архангельска (Архангельская область)",
-            "court_website": "http://lomonosovsky.arh.sudrf.ru/",
+            "court_website": "http://lomonosovsky.arh.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -1149,7 +1149,7 @@
         {
             "court_id": "31RS0002",
             "court_name": "Белгородский районный суд (Белгородская область)",
-            "court_website": "http://belgorodsky.blg.sudrf.ru/",
+            "court_website": "http://belgorodsky.blg.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -1221,7 +1221,7 @@
         {
             "court_id": "31RS0012",
             "court_name": "Красногвардейский районный суд (Белгородская область)",
-            "court_website": "http://krasnogvardeisky.blg.sudrf.ru/",
+            "court_website": "http://krasnogvardeisky.blg.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -1386,7 +1386,7 @@
         {
             "court_id": "32RS0008",
             "court_name": "Дятьковский городской суд (Брянская область)",
-            "court_website": "http://diatkovsky.brj.sudrf.ru/",
+            "court_website": "http://diatkovsky.brj.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -1434,7 +1434,7 @@
         {
             "court_id": "32RS0015",
             "court_name": "Клинцовский городской суд (Брянская область)",
-            "court_website": "http://klyncovsky.brj.sudrf.ru/",
+            "court_website": "http://klyncovsky.brj.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -1515,7 +1515,7 @@
         {
             "court_id": "32RS0026",
             "court_name": "Сельцовский городской суд (Брянская область)",
-            "court_website": "http://selcovsky.brj.sudrf.ru/",
+            "court_website": "http://selcovsky.brj.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -2407,7 +2407,7 @@
         {
             "court_id": "36RS0002",
             "court_name": "Коминтерновский районный суд г. Воронежа (Воронежская область)",
-            "court_website": "http://kominternovsky.vrn.sudrf.ru/",
+            "court_website": "http://kominternovsky.vrn.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -2601,7 +2601,7 @@
         {
             "court_id": "77RS0003",
             "court_name": "Бутырский районный суд (Город Москва)",
-            "court_website": "http://butyrsky.msk.sudrf.ru/",
+            "court_website": "http://butyrsky.msk.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -2617,7 +2617,7 @@
         {
             "court_id": "77RS0004",
             "court_name": "Гагаринский районный суд (Город Москва)",
-            "court_website": "http://gagarinsky.msk.sudrf.ru/",
+            "court_website": "http://gagarinsky.msk.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -2721,7 +2721,7 @@
         {
             "court_id": "77GV0001",
             "court_name": "Московский гарнизонный военный суд (Город Москва)",
-            "court_website": "http://moskovskygvs.msk.sudrf.ru/",
+            "court_website": "http://moskovskygvs.msk.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -3059,7 +3059,7 @@
         {
             "court_id": "78RS0019",
             "court_name": "Приморский районный суд (Город Санкт-Петербург)",
-            "court_website": "http://primorsky.spb.sudrf.ru/",
+            "court_website": "http://primorsky.spb.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -3306,7 +3306,7 @@
         {
             "court_id": "75OS0000",
             "court_name": "Забайкальский краевой суд (Забайкальский край)",
-            "court_website": "http://oblsud.cht.sudrf.ru/",
+            "court_website": "http://oblsud.cht.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -4461,7 +4461,7 @@
         {
             "court_id": "41OS0000",
             "court_name": "Камчатский краевой суд (Камчатский край)",
-            "court_website": "http://oblsud.kam.sudrf.ru/",
+            "court_website": "http://oblsud.kam.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -5002,7 +5002,7 @@
         {
             "court_id": "43OS0000",
             "court_name": "Кировский областной суд (Кировская область)",
-            "court_website": "http://oblsud.kir.sudrf.ru/",
+            "court_website": "http://oblsud.kir.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6494,7 +6494,7 @@
         {
             "court_id": "45OS0000",
             "court_name": "Курганский областной суд (Курганская область)",
-            "court_website": "http://oblsud.krg.sudrf.ru/",
+            "court_website": "http://oblsud.krg.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6624,7 +6624,7 @@
         {
             "court_id": "46RS0001",
             "court_name": "Беловский районный суд (Курская область)",
-            "court_website": "http://belovsky.krs.sudrf.ru/",
+            "court_website": "http://belovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6632,7 +6632,7 @@
         {
             "court_id": "46RS0002",
             "court_name": "Большесолдатский районный суд (Курская область)",
-            "court_website": "http://bolshesoldatsky.krs.sudrf.ru/",
+            "court_website": "http://bolshesoldatsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6640,7 +6640,7 @@
         {
             "court_id": "46RS0003",
             "court_name": "Глушковский районный суд (Курская область)",
-            "court_website": "http://glushkovsky.krs.sudrf.ru/",
+            "court_website": "http://glushkovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6648,7 +6648,7 @@
         {
             "court_id": "46RS0004",
             "court_name": "Горшеченский районный суд (Курская область)",
-            "court_website": "http://gorshechensky.krs.sudrf.ru/",
+            "court_website": "http://gorshechensky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6656,7 +6656,7 @@
         {
             "court_id": "46RS0005",
             "court_name": "Дмитриевский районный суд (Курская область)",
-            "court_website": "http://dmitrievsky.krs.sudrf.ru/",
+            "court_website": "http://dmitrievsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6664,7 +6664,7 @@
         {
             "court_id": "46RS0006",
             "court_name": "Железногорский городской суд (Курская область)",
-            "court_website": "http://zheleznogorsky.krs.sudrf.ru/",
+            "court_website": "http://zheleznogorsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6672,7 +6672,7 @@
         {
             "court_id": "46RS0007",
             "court_name": "Золотухинский районный суд (Курская область)",
-            "court_website": "http://zolotuhinsky.krs.sudrf.ru/",
+            "court_website": "http://zolotuhinsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6680,7 +6680,7 @@
         {
             "court_id": "46RS0008",
             "court_name": "Касторенский районный суд (Курская область)",
-            "court_website": "http://kastorensky.krs.sudrf.ru/",
+            "court_website": "http://kastorensky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6688,7 +6688,7 @@
         {
             "court_id": "46RS0029",
             "court_name": "Кировский районный суд г. Курска (Курская область)",
-            "court_website": "http://kirovsky.krs.sudrf.ru/",
+            "court_website": "http://kirovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6696,7 +6696,7 @@
         {
             "court_id": "46RS0009",
             "court_name": "Конышевский районный суд (Курская область)",
-            "court_website": "http://konyshevsky.krs.sudrf.ru/",
+            "court_website": "http://konyshevsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6704,7 +6704,7 @@
         {
             "court_id": "46RS0010",
             "court_name": "Кореневский районный суд (Курская область)",
-            "court_website": "http://korenevsky.krs.sudrf.ru/",
+            "court_website": "http://korenevsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6712,7 +6712,7 @@
         {
             "court_id": "77GV0020",
             "court_name": "Курский гарнизонный военный суд (Курская область)",
-            "court_website": "http://gvs.krs.sudrf.ru/",
+            "court_website": "http://gvs.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6720,7 +6720,7 @@
         {
             "court_id": "46OS0000",
             "court_name": "Курский областной суд (Курская область)",
-            "court_website": "http://oblsud.krs.sudrf.ru/",
+            "court_website": "http://oblsud.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6728,7 +6728,7 @@
         {
             "court_id": "46RS0011",
             "court_name": "Курский районный суд (Курская область)",
-            "court_website": "http://kursky.krs.sudrf.ru/",
+            "court_website": "http://kursky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6736,7 +6736,7 @@
         {
             "court_id": "46RS0012",
             "court_name": "Курчатовский городской суд (Курская область)",
-            "court_website": "http://kurchatovsky.krs.sudrf.ru/",
+            "court_website": "http://kurchatovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6744,7 +6744,7 @@
         {
             "court_id": "46RS0030",
             "court_name": "Ленинский районный суд г. Курска (Курская область)",
-            "court_website": "http://lensud.krs.sudrf.ru/",
+            "court_website": "http://lensud.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6752,7 +6752,7 @@
         {
             "court_id": "46RS0013",
             "court_name": "Льговский районный суд (Курская область)",
-            "court_website": "http://lgovsky.krs.sudrf.ru/",
+            "court_website": "http://lgovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6760,7 +6760,7 @@
         {
             "court_id": "46RS0014",
             "court_name": "Мантуровский районный суд (Курская область)",
-            "court_website": "http://manturovsky.krs.sudrf.ru/",
+            "court_website": "http://manturovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6768,7 +6768,7 @@
         {
             "court_id": "46RS0015",
             "court_name": "Медвенский районный суд (Курская область)",
-            "court_website": "http://medvensky.krs.sudrf.ru/",
+            "court_website": "http://medvensky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6776,7 +6776,7 @@
         {
             "court_id": "46RS0016",
             "court_name": "Обоянский районный суд (Курская область)",
-            "court_website": "http://oboyansky.krs.sudrf.ru/",
+            "court_website": "http://oboyansky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6784,7 +6784,7 @@
         {
             "court_id": "46RS0017",
             "court_name": "Октябрьский районный суд (Курская область)",
-            "court_website": "http://oktiabrsky.krs.sudrf.ru/",
+            "court_website": "http://oktiabrsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6792,7 +6792,7 @@
         {
             "court_id": "46RS0018",
             "court_name": "Поныровский районный суд (Курская область)",
-            "court_website": "http://ponyrovsky.krs.sudrf.ru/",
+            "court_website": "http://ponyrovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6800,7 +6800,7 @@
         {
             "court_id": "46RS0019",
             "court_name": "Пристенский районный суд (Курская область)",
-            "court_website": "http://pristensky.krs.sudrf.ru/",
+            "court_website": "http://pristensky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6808,7 +6808,7 @@
         {
             "court_id": "46RS0031",
             "court_name": "Промышленный районный суд г. Курска (Курская область)",
-            "court_website": "http://promyshleny.krs.sudrf.ru/",
+            "court_website": "http://promyshleny.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6816,7 +6816,7 @@
         {
             "court_id": "46RS0020",
             "court_name": "Рыльский районный суд (Курская область)",
-            "court_website": "http://rylsky.krs.sudrf.ru/",
+            "court_website": "http://rylsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6824,7 +6824,7 @@
         {
             "court_id": "46RS0021",
             "court_name": "Советский районный суд (Курская область)",
-            "court_website": "http://sovetsky.krs.sudrf.ru/",
+            "court_website": "http://sovetsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6832,7 +6832,7 @@
         {
             "court_id": "46RS0022",
             "court_name": "Солнцевский районный суд (Курская область)",
-            "court_website": "http://solncevsky.krs.sudrf.ru/",
+            "court_website": "http://solncevsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6840,7 +6840,7 @@
         {
             "court_id": "46RS0023",
             "court_name": "Суджанский районный суд (Курская область)",
-            "court_website": "http://sudzhansky.krs.sudrf.ru/",
+            "court_website": "http://sudzhansky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6848,7 +6848,7 @@
         {
             "court_id": "46RS0024",
             "court_name": "Тимский районный суд (Курская область)",
-            "court_website": "http://timsky.krs.sudrf.ru/",
+            "court_website": "http://timsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6856,7 +6856,7 @@
         {
             "court_id": "46RS0025",
             "court_name": "Фатежский районный суд (Курская область)",
-            "court_website": "http://fatezhsky.krs.sudrf.ru/",
+            "court_website": "http://fatezhsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6864,7 +6864,7 @@
         {
             "court_id": "46RS0026",
             "court_name": "Хомутовский районный суд (Курская область)",
-            "court_website": "http://homutovsky.krs.sudrf.ru/",
+            "court_website": "http://homutovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6872,7 +6872,7 @@
         {
             "court_id": "46RS0027",
             "court_name": "Черемисиновский районный суд (Курская область)",
-            "court_website": "http://cheremisinovsky.krs.sudrf.ru/",
+            "court_website": "http://cheremisinovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6880,7 +6880,7 @@
         {
             "court_id": "46RS0028",
             "court_name": "Щигровский районный суд (Курская область)",
-            "court_website": "http://shigrovsky.krs.sudrf.ru/",
+            "court_website": "http://shigrovsky.krs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -6986,7 +6986,7 @@
         {
             "court_id": "47RS0011",
             "court_name": "Ломоносовский районный суд (Ленинградская область)",
-            "court_website": "http://lomonosovsky.lo.sudrf.ru/",
+            "court_website": "http://lomonosovsky.lo.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -7002,7 +7002,7 @@
         {
             "court_id": "47RS0013",
             "court_name": "Подпорожский городской суд (Ленинградская область)",
-            "court_website": "http://podporozhsky.lo.sudrf.ru/",
+            "court_website": "http://podporozhsky.lo.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -7052,7 +7052,7 @@
         {
             "court_id": "48RS0010",
             "court_name": "Грязинский городской суд (Липецкая область)",
-            "court_website": "http://grjazsud.lpk.sudrf.ru/",
+            "court_website": "http://grjazsud.lpk.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -7110,7 +7110,7 @@
         {
             "court_id": "48RS0004",
             "court_name": "Левобережный районный суд г. Липецка (Липецкая область)",
-            "court_website": "http://levsud.lpk.sudrf.ru/",
+            "court_website": "http://levsud.lpk.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -7118,7 +7118,7 @@
         {
             "court_id": "48OS0000",
             "court_name": "Липецкий областной суд (Липецкая область)",
-            "court_website": "http://oblsud.lpk.sudrf.ru/",
+            "court_website": "http://oblsud.lpk.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -7853,7 +7853,7 @@
         {
             "court_id": "51OV0000",
             "court_name": "Северный флотский военный суд (Мурманская область)",
-            "court_website": "http://severnyfvs.mrm.sudrf.ru/",
+            "court_website": "http://severnyfvs.mrm.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -8186,7 +8186,7 @@
         {
             "court_id": "52OS0000",
             "court_name": "Нижегородский областной суд (Нижегородская область)",
-            "court_website": "http://nnoblsud.ru/",
+            "court_website": "http://nnoblsud.ru",
             "srv": [
                 "1"
             ]
@@ -9605,7 +9605,7 @@
         {
             "court_id": "58RS0004",
             "court_name": "Бековский районный суд (Пензенская область)",
-            "court_website": "http://bekovsky.pnz.sudrf.ru/",
+            "court_website": "http://bekovsky.pnz.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -10289,7 +10289,7 @@
         {
             "court_id": "25RS0039",
             "court_name": "Надеждинский районный суд (Приморский край)",
-            "court_website": "http://nadezhdinsky.prm.sudrf.ru/",
+            "court_website": "http://nadezhdinsky.prm.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -11480,7 +11480,7 @@
         {
             "court_id": "05OS0000",
             "court_name": "Верховный Суд Республики Дагестан (Республика Дагестан)",
-            "court_website": "http://vs.dag.sudrf.ru/",
+            "court_website": "http://vs.dag.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -12025,7 +12025,7 @@
         {
             "court_id": "10RS0011",
             "court_name": "Петрозаводский городской суд (Республика Карелия)",
-            "court_website": "http://petrozavodsky.kar.sudrf.ru/",
+            "court_website": "http://petrozavodsky.kar.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -12558,7 +12558,7 @@
         {
             "court_id": "13OS0000",
             "court_name": "Верховный Суд Республики Мордовия (Республика Мордовия)",
-            "court_website": "http://vs.mor.sudrf.ru/",
+            "court_website": "http://vs.mor.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -12899,7 +12899,7 @@
         {
             "court_id": "14RS0035",
             "court_name": "Якутский городской суд (Республика Саха (Якутия))",
-            "court_website": "http://jakutsky.jak.sudrf.ru/",
+            "court_website": "http://jakutsky.jak.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -13151,7 +13151,7 @@
         {
             "court_id": "16OS0000",
             "court_name": "Верховный Суд Республики Татарстан (Республика Татарстан)",
-            "court_website": "http://vs.tat.sudrf.ru/",
+            "court_website": "http://vs.tat.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -13750,7 +13750,7 @@
         {
             "court_id": "61RS0011",
             "court_name": "Белокалитвинский городской суд (Ростовская область)",
-            "court_website": "http://belokalitvensky.ros.sudrf.ru/",
+            "court_website": "http://belokalitvensky.ros.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -13998,7 +13998,7 @@
         {
             "court_id": "61OS0000",
             "court_name": "Ростовский областной суд (Ростовская область)",
-            "court_website": "http://oblsud.ros.sudrf.ru/",
+            "court_website": "http://oblsud.ros.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -14208,7 +14208,7 @@
         {
             "court_id": "62OS0000",
             "court_name": "Рязанский областной суд (Рязанская область)",
-            "court_website": "http://oblsud.riz.sudrf.ru/",
+            "court_website": "http://oblsud.riz.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -14348,7 +14348,7 @@
         {
             "court_id": "63RS0044",
             "court_name": "Железнодорожный районный суд г. Самары (Самарская область)",
-            "court_website": "http://zheleznodorozhny.sam.sudrf.ru/",
+            "court_website": "http://zheleznodorozhny.sam.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -14539,7 +14539,7 @@
         {
             "court_id": "63OS0000",
             "court_name": "Самарский областной суд (Самарская область)",
-            "court_website": "http://oblsud.sam.sudrf.ru/",
+            "court_website": "http://oblsud.sam.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -15384,7 +15384,7 @@
         {
             "court_id": "66OS0000",
             "court_name": "Свердловский областной суд (Свердловская область)",
-            "court_website": "http://oblsud.svd.sudrf.ru/",
+            "court_website": "http://oblsud.svd.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -15464,7 +15464,7 @@
         {
             "court_id": "66OV0001",
             "court_name": "Центральный окружной военный суд (Свердловская область)",
-            "court_website": "http://covs.svd.sudrf.ru/",
+            "court_website": "http://covs.svd.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -15635,7 +15635,7 @@
         {
             "court_id": "67OS0000",
             "court_name": "Смоленский областной суд (Смоленская область)",
-            "court_website": "http://oblsud.sml.sudrf.ru/",
+            "court_website": "http://oblsud.sml.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -15957,7 +15957,7 @@
         {
             "court_id": "26OS0000",
             "court_name": "Ставропольский краевой суд (Ставропольский край)",
-            "court_website": "http://kraevoy.stv.sudrf.ru/",
+            "court_website": "http://kraevoy.stv.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16446,7 +16446,7 @@
         {
             "court_id": "69OS0000",
             "court_name": "Тверской областной суд (Тверская область)",
-            "court_website": "http://oblsud.twr.sudrf.ru/",
+            "court_website": "http://oblsud.twr.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16659,7 +16659,7 @@
         {
             "court_id": "70OS0000",
             "court_name": "Томский областной суд (Томская область)",
-            "court_website": "http://oblsud.tms.sudrf.ru/",
+            "court_website": "http://oblsud.tms.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16733,7 +16733,7 @@
         {
             "court_id": "71RS0025",
             "court_name": "Зареченский районный суд г.Тулы (Тульская область)",
-            "court_website": "http://zarechensky.tula.sudrf.ru/",
+            "court_website": "http://zarechensky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16749,7 +16749,7 @@
         {
             "court_id": "71RS0013",
             "court_name": "Киреевский районный суд (Тульская область)",
-            "court_website": "http://kireevsky.tula.sudrf.ru/",
+            "court_website": "http://kireevsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16757,7 +16757,7 @@
         {
             "court_id": "71RS0015",
             "court_name": "Ленинский районный суд (Тульская область)",
-            "court_website": "http://leninsky.tula.sudrf.ru/",
+            "court_website": "http://leninsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16765,7 +16765,7 @@
         {
             "court_id": "71RS0016",
             "court_name": "Новомосковский районный суд (Тульская область)",
-            "court_website": "http://novomoskovsky.tula.sudrf.ru/",
+            "court_website": "http://novomoskovsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16773,7 +16773,7 @@
         {
             "court_id": "71RS0017",
             "court_name": "Одоевский межрайонный суд Тульской области (Тульская область)",
-            "court_website": "http://odoevsky.tula.sudrf.ru/",
+            "court_website": "http://odoevsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16781,7 +16781,7 @@
         {
             "court_id": "71RS0018",
             "court_name": "Плавский межрайонный суд Тульской области (Тульская область)",
-            "court_website": "http://plavsky.tula.sudrf.ru/",
+            "court_website": "http://plavsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16789,7 +16789,7 @@
         {
             "court_id": "71RS0026",
             "court_name": "Привокзальный районный суд г.Тулы (Тульская область)",
-            "court_website": "http://privokzalny.tula.sudrf.ru/",
+            "court_website": "http://privokzalny.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16797,7 +16797,7 @@
         {
             "court_id": "71RS0027",
             "court_name": "Пролетарский районный суд г.Тулы (Тульская область)",
-            "court_website": "http://proletarsky.tula.sudrf.ru/",
+            "court_website": "http://proletarsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16805,7 +16805,7 @@
         {
             "court_id": "71RS0028",
             "court_name": "Советский районный суд г. Тулы (Тульская область)",
-            "court_website": "http://sovetsky.tula.sudrf.ru/",
+            "court_website": "http://sovetsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16813,7 +16813,7 @@
         {
             "court_id": "71RS0019",
             "court_name": "Суворовский межрайонный суд Тульской области (Тульская область)",
-            "court_website": "http://suvorovsky.tula.sudrf.ru/",
+            "court_website": "http://suvorovsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16821,7 +16821,7 @@
         {
             "court_id": "77GV0015",
             "court_name": "Тульский гарнизонный военный суд (Тульская область)",
-            "court_website": "http://gvs.tula.sudrf.ru/",
+            "court_website": "http://gvs.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16837,7 +16837,7 @@
         {
             "court_id": "71RS0021",
             "court_name": "Узловский районный суд (Тульская область)",
-            "court_website": "http://uzlovsky.tula.sudrf.ru/",
+            "court_website": "http://uzlovsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16845,7 +16845,7 @@
         {
             "court_id": "71RS0029",
             "court_name": "Центральный районный суд г.Тулы (Тульская область)",
-            "court_website": "http://centralny.tula.sudrf.ru/",
+            "court_website": "http://centralny.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16853,7 +16853,7 @@
         {
             "court_id": "71RS0023",
             "court_name": "Щекинский межрайонный суд Тульской области (Тульская область)",
-            "court_website": "http://schekinsky.tula.sudrf.ru/",
+            "court_website": "http://schekinsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16861,7 +16861,7 @@
         {
             "court_id": "71RS0024",
             "court_name": "Ясногорский районный суд (Тульская область)",
-            "court_website": "http://yazsnogorsky.tula.sudrf.ru/",
+            "court_website": "http://yazsnogorsky.tula.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18161,7 +18161,7 @@
         {
             "court_id": "74OS0000",
             "court_name": "Челябинский областной суд (Челябинская область)",
-            "court_website": "http://oblsud.chel.sudrf.ru/",
+            "court_website": "http://oblsud.chel.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18342,7 +18342,7 @@
         {
             "court_id": "21OS0000",
             "court_name": "Верховный Суд Чувашской Республики (Чувашская Республика - Чувашия)",
-            "court_website": "http://vs.chv.sudrf.ru/",
+            "court_website": "http://vs.chv.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18567,7 +18567,7 @@
         {
             "court_id": "89RS0013",
             "court_name": "Губкинский районный суд (Ямало-Ненецкий автономный округ)",
-            "court_website": "http://gubkinskiy.ynao.sudrf.ru/",
+            "court_website": "http://gubkinskiy.ynao.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18599,7 +18599,7 @@
         {
             "court_id": "89RS0003",
             "court_name": "Надымский городской суд (Ямало-Ненецкий автономный округ)",
-            "court_website": "http://nadymsky.ynao.sudrf.ru/",
+            "court_website": "http://nadymsky.ynao.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18615,7 +18615,7 @@
         {
             "court_id": "89RS0005",
             "court_name": "Ноябрьский городской суд (Ямало-Ненецкий автономный округ)",
-            "court_website": "http://noyabrsky.ynao.sudrf.ru/",
+            "court_website": "http://noyabrsky.ynao.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18849,7 +18849,7 @@
         {
             "court_id": "76OS0000",
             "court_name": "Ярославский областной суд (Ярославская область)",
-            "court_website": "http://oblsud.jrs.sudrf.ru/",
+            "court_website": "http://oblsud.jrs.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18867,7 +18867,7 @@
         {
             "court_id": "66GV0008",
             "court_name": "109 гарнизонный военный суд (Территории за пределами РФ)",
-            "court_website": "http://109gvs.svd.sudrf.ru/",
+            "court_website": "http://109gvs.svd.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18883,7 +18883,7 @@
         {
             "court_id": "31GV0015",
             "court_name": "40 гарнизонный военный суд (Территории за пределами РФ)",
-            "court_website": "http://40gvs.blg.sudrf.ru/",
+            "court_website": "http://40gvs.blg.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -18899,7 +18899,7 @@
         {
             "court_id": "77GV0022",
             "court_name": "80 гарнизонный военный суд (Территории за пределами РФ)",
-            "court_website": "http://80gvs.msk.sudrf.ru/",
+            "court_website": "http://80gvs.msk.sudrf.ru",
             "srv": [
                 "1"
             ]
