@@ -376,6 +376,8 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
 
         try:
             browser.get(link_to_site)
+            # explicitly waiting for the results table
+            el_found = _explicit_wait(browser,"ID","tablcont",6)
             soup = BeautifulSoup(browser.page_source, 'html.parser')
 
             # no cases found (no results or error)
