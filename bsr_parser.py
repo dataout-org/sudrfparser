@@ -79,7 +79,7 @@ def _parse_bsr_case_info(result_list:list) -> list:
         case_info["metadata"] = {}
 
         case_url = li.find("a",{"class":"resultHeader"})["href"]
-        case_id = re.search("(id=.*&shard=)",case_url)[0].replace("id=","").replace("&shard=","")
+        case_id_bsr = re.search("(id=.*&shard=)",case_url)[0].replace("id=","").replace("&shard=","")
         case_name = li.find("div",{"class":"bgs-result"}).a.contents[0]
         id_text = case_name.replace("Уголовное дело ","")
 
@@ -97,7 +97,7 @@ def _parse_bsr_case_info(result_list:list) -> list:
                 decision_result = field.span.contents[0]
 
         case_info["case_url"] = case_url
-        case_info["case_id_uid"] = case_id
+        case_info["case_id_bsr"] = case_id_bsr
         case_info["metadata"]["id_text"] = id_text
         case_info["metadata"]["court_name"] = court_name
         case_info["metadata"]["adm_date"] = adm_date
@@ -125,7 +125,7 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
 
     # generating a request ID based on local time
     timestamp = time.localtime()
-    request_id = f"{timestamp[3]}-{timestamp[4]}-{timestamp[5]}-{timestamp[2]}-{timestamp[1]}-{timestamp[0]}"
+    request_id = f"{timestamp[4]}-{timestamp[3]}-{timestamp[2]}-{timestamp[1]}-{timestamp[0]}"
 
     for keyword in keywords:
 
@@ -218,21 +218,20 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
 
     return results
 
-def _get_court_website_srv(court_name:str) -> tuple:
+def _get_court_website(court_name:str) -> str:
+
+    court_website = ""
     
     court_codes_url = "https://github.com/dataout-org/sudrfparser/raw/main/courts_info/sudrf_websites.json"
     r = requests.get(court_codes_url)
     court_codes = r.json()
-    
-    info_to_return = ()
-    
+
     for region_code, courts_info in court_codes.items():
         for court in courts_info:
             if court_name in court["court_name"]:
-                info_to_return = (court["court_website"], court["srv"])
+                court_website = court["court_website"]
                 
-    return info_to_return
-
+    return court_website
 
 def _get_captcha_from_soup_f1(soup_captcha) -> str:
     '''
@@ -268,9 +267,14 @@ def _get_case_link_f1(soup) -> list:
             
     return case_link
 
-def _get_case_by_id_f1(browser,id_text:str,court_website:str,adm_date:str,srv_num:list,captcha:str,soup_captcha='') -> dict:
+def _get_case_by_id_f1(browser, court_website:str, id_text:str, adm_date:str, captcha:str, soup_captcha='') -> dict:
     '''
     '''
+
+    results = {}
+    metadata = {}
+    results["case_text"] = ""
+    metadata["accused"] = []
 
     module_case_f1 = f'/modules.php?name=sud_delo&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__CASE_NUMBERSS={id_text}&delo_table=u1_case&u1_case__ENTRY_DATE1D={adm_date}&u1_case__ENTRY_DATE2D={adm_date}'
 
@@ -287,31 +291,81 @@ def _get_case_by_id_f1(browser,id_text:str,court_website:str,adm_date:str,srv_nu
         el_found = sudrfparser._explicit_wait(browser,"ID","tablcont",6)
         soup = BeautifulSoup(browser.page_source, 'html.parser')
 
-        # no case found (no results or error)
-        if soup.find("table", {"id": "tablcont"}) == None:
-            # TO-DO
-                    
-            # if there is a table with results
-            else:
-                case_link = _get_case_link_f1(soup)
-                if len(case_link) > 1:
-                    # TO-DO
-                else:
-                    # get case info
-                    browser.get(case_link[0])
-                    soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+        # case found
+        if soup.find("table", {"id": "tablcont"}) != None:
 
-                    # getting case data
-                    content = soup.find('div', {'class': 'contentt'})
-                    # TO-DO
+            results["case_found"] = "True"
+
+            case_link = _get_case_link_f1(soup)
+            case_id_uid = re.search('case_id=\d*&case_uid=.*&',case_link[0])[0].rstrip('&')
+            results["case_id_uid"] = case_id_uid
+        
+            # get case info
+            browser.get(case_link[0])
+            soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+
+            # single case page / getting case data
+            content = soup_case.find('div', {'class': 'contentt'})
+
+            ### case decision text
+            ###
+            # checking tabs
+            tabs = content.find("ul", class_="tabs").find_all("li")
+
+            for tab in tabs:
+                # getting the tab ID with the case text 
+                if " АКТЫ" in tab.text:
+                    tab_id = tab.attrs['id'].replace('tab','cont')
+                    results["case_text"] = content.find('div',{'id':tab_id}).text.replace('"','\'').replace('\xa0','')
+
+                ### accused info: names and articles
+                ###
+                if 'ЛИЦА' in tab.text:
+                    accused_list = []
+                    tab_id = tab.attrs['id'].replace('tab','cont')
+                    accused_content = content.find('div',{'id':tab_id}).find_all('tr')
+                    for tr in accused_content[2:]:
+                        accused_list.append({'name':tr.find_all('td')[0].text,\
+                                            'article':tr.find_all('td')[1].text.rstrip('УК РФ').split(';')})
+                    metadata["accused"] = accused_list
+                ###
+            ###
+
+            ### case metadata
+            ###
+            # adding already known metadata
+            metadata["id_text"] = id_text
+            metadata["adm_date"] = adm_date
+
+            metadata_1 = content.find('div', {'id': 'cont1'})
+        
+            for tr in metadata_1.find('table').find_all('tr'):
+                # another case identifier
+                if 'идентификатор' in tr.text:
+                    metadata["uid_2"] = tr.find_all('td')[-1].text
+                # judge
+                if 'Судья' in tr.text:
+                    metadata["judge"] = tr.find_all('td')[-1].text
+                # case decision result
+                if 'Результат' in tr.text:
+                    metadata["decision_result"] = tr.find_all('td')[-1].text
+            ###
+
+            results["metadata"] = metadata
+
+        else:
+            results = "Case not found"
+
+    except WebDriverException:
+        results = "Case page cannot be parsed. Web driver error"
+
+    return results
 
 
-
-def find_case_by_id(path_to_driver:str,id_text:str,court_website:str,adm_date:str,srv_num:list,path_to_save="") -> str:
+def _find_one_case_by_id(browser, court_website:str, id_text:str, adm_date:str) -> dict:
     '''
     '''
 
-    browser = sudrfparser._set_browser(path_to_driver)
     link_to_site = court_website + "/modules.php?name=sud_delo&srv_num=1&name_op=sf&delo_id=1540005"
 
     try:
@@ -328,18 +382,18 @@ def find_case_by_id(path_to_driver:str,id_text:str,court_website:str,adm_date:st
             form_type = form_and_captcha["form_type"]
             captcha = form_and_captcha["captcha"]
 
-             # parser for form1
+            # parser for form1
             if form_type == "form1" and captcha == "False":
-                # TO-DO
+                results = _get_case_by_id_f1(browser,court_website,id_text,adm_date,captcha)
 
             if form_type == "form1" and captcha == "True":
-                # TO-DO
+                results = _get_case_by_id_f1(browser,court_website,id_text,adm_date,captcha,soup)
 
             # parser for form2
-            if form_type == "form2" and captcha == "False":
+            #if form_type == "form2" and captcha == "False":
                 # TO-DO
 
-            if form_type == "form2" and captcha == "True":
+            #if form_type == "form2" and captcha == "True":
                 # TO-DO
 
         else:
@@ -353,6 +407,56 @@ def find_case_by_id(path_to_driver:str,id_text:str,court_website:str,adm_date:st
     
     return results
 
+# the master function
+
+def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> str:
+
+    browser = sudrfparser._set_browser(path_to_driver)
+
+    # generating an ID based on local time
+    timestamp = time.localtime()
+    request_id = f"{timestamp[4]}-{timestamp[3]}-{timestamp[2]}-{timestamp[1]}-{timestamp[0]}"
+
+    result_one_case = {}
+    logs_failed_cases = {}
+
+    for keyword, cases_by_keyword in cases_info.items():
+        for case in cases_by_keyword["cases"]:
+
+            id_text = case["metadata"]["id_text"]
+            court_name = case["metadata"]["court_name"]
+            court_website = _get_court_website(court_name)
+            adm_date = case["metadata"]["adm_date"]
+            case_id_bsr = case["case_id_bsr"]
+
+            one_case_data = _find_one_case_by_id(browser,court_website,id_text,adm_date)
+
+            if type(one_case_data) != str:
+
+                one_case_data["keyword"] = keyword
+                result_one_case["case_id_bsr"] = one_case_data
+
+                # saving results per case
+                file_name = f"{path_to_save}/{case_id_bsr}_{adm_date.split('.')[-1]}.json"
+
+                with open(file_name, 'w') as jf:
+                    json.dump(result_one_case, jf, ensure_ascii=False)
+
+                print(f"Case {case_id_bsr} saved")
+
+            # if there are no results
+            else:
+                logs_failed_cases[case_id_bsr] = one_case_data
+                print(f"Case {case_id_bsr} failed")
+
+    # save logs
+    file_name_logs = f"{path_to_save}/failed_cases_{request_id}.json"
+    with open(file_name_logs, 'w') as jf:
+        json.dump(logs_failed_cases, jf)
+
+    return f"Job is finished. Results are saved in {path_to_save}"
+
+# Function to parse cases from the bsr portal directly
 def get_cases_by_keywords(path_to_driver:str, cases_links:dict, cases_ids_to_ignore=[], path_to_save="") -> str:
     '''
     path_to_driver: str, path to Chrome driver;
