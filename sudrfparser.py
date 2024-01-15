@@ -306,31 +306,43 @@ def _get_captcha_f1(browser,website:str) -> str:
     Returns str, an addition to the link with captcha code;
     '''
     page_with_code = website + "/modules.php?name=sud_delo&srv_num=1&name_op=sf&delo_id=1540005"
-    browser.get(page_with_code)
-    # checking if the search form is present
-    check_content = _explicit_wait(browser,"ID","content",6)
 
-    if check_content == False:
-        captcha_addition = ""
+    tries = 0
+
+    while tries <= 3:
+
+        browser.get(page_with_code)
+        # checking if the search form is present
+        check_content = _explicit_wait(browser,"ID","content",6)
+
+        # form is present, getting captcha code
+        if check_content == True:
+
+            soup = BeautifulSoup(browser.page_source, 'html.parser')
+            # finding the first table in the form
+            content = soup.find("div", {"id": "content"}).find("table")
+            # getting captcha ID
+            captcha_id = content.find("input", {"name": "captchaid"})["value"]
+
+            imgstring = content.find("img")["src"].split(",")[1]
+            imgdata = base64.b64decode(imgstring)
+            # enlarging the captcha image
+            display(Image(imgdata, width=400, height=200))
+
+            # entering captcha manually
+            captcha_entered = input("Enter captcha: ")
+            captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
+
+            # success, stop trying
+            break
+
         # failed to retrieve captcha
-
-    # form is present, getting captcha code
-    else:
-        soup = BeautifulSoup(browser.page_source, 'html.parser')
-        # finding the first table in the form
-        content = soup.find("div", {"id": "content"}).find("table")
-        # getting captcha ID
-        captcha_id = content.find("input", {"name": "captchaid"})["value"]
-
-        imgstring = content.find("img")["src"].split(",")[1]
-        imgdata = base64.b64decode(imgstring)
-        # enlarging the captcha image
-        display(Image(imgdata, width=400, height=200))
-
-        # entering captcha manually
-        captcha_entered = input("Enter captcha: ")
-        captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
-
+        else:
+            tries += 1
+            captcha_addition = ""
+            # try again
+            continue
+            
     return captcha_addition
 
 def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False) -> dict:
@@ -643,32 +655,43 @@ def _get_captcha_f2(browser,website:str) -> str:
     '''
     page_with_code = website + "/modules.php?name=sud_delo&name_op=sf&srv_num=1"
 
-    browser.get(page_with_code)
-    # checking if the search form is present
-    check_content = _explicit_wait(browser,"ID","search-form",6)
+    tries = 0
 
-    if check_content == False:
-        captcha_addition = ""
+    while tries <=3:
+
+        browser.get(page_with_code)
+        # checking if the search form is present
+        check_content = _explicit_wait(browser,"ID","search-form",6)
+
+        # form is present, getting captcha code
+        if check_content == True:
+
+            soup = BeautifulSoup(browser.page_source, 'html.parser')
+            content = soup.find("form", {"class":"form-container"})
+            # getting captcha ID
+            captcha_id = content.find("input", {"name": "captchaid"})["value"]
+
+            for img in content.find_all("img"):
+                if "data" in img["src"]:
+                    imgstring = img["src"].split(",")[1]
+
+            imgdata = base64.b64decode(imgstring)
+            display(Image(imgdata, width=400, height=200))
+
+            # entering captcha manually
+            captcha_entered = input("Enter captcha: ")
+
+            captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
+
+            # success, stop trying
+            break
+
         # failed to retrieve captcha
-
-    # form is present, getting captcha code
-    else:
-        soup = BeautifulSoup(browser.page_source, 'html.parser')
-        content = soup.find("form", {"class":"form-container"})
-        # getting captcha ID
-        captcha_id = content.find("input", {"name": "captchaid"})["value"]
-
-        for img in content.find_all("img"):
-            if "data" in img["src"]:
-                imgstring = img["src"].split(",")[1]
-
-        imgdata = base64.b64decode(imgstring)
-        display(Image(imgdata, width=400, height=200))
-
-        # entering captcha manually
-        captcha_entered = input("Enter captcha: ")
-
-        captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
+        else:
+            tries += 1
+            captcha_addition = ""
+            # try again
+            continue
 
     return captcha_addition
 
