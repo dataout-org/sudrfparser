@@ -881,7 +881,7 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
                 # no point in trying because websites with other forms are not parsed
                 if form_type == "other":
                     results = f"{website} cannot be parsed"
-                    
+
                 # succesful, stop trying
                 break
 
@@ -893,7 +893,7 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
         # web driver error, try again
         except WebDriverException:
             tries += 1
-                continue
+            continue
 
     # give up if conent is still not loaded after 3 tries
     if content_found = False:
