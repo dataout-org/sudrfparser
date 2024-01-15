@@ -845,43 +845,59 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
     browser = _set_browser(path_to_driver)
     link_to_site = website + "/modules.php?name=sud_delo&srv_num=1&name_op=sf&delo_id=1540005"
 
-    try:
-        browser.get(link_to_site)
-        content_found = _explicit_wait(browser,"ID","modSdpContent",6)
-        # additional time if explicit wait fails
-        time.sleep(3)
+    # try to load the website content 3 times
+    tries = 0
+    content_found = False
 
-        if content_found == True:
+    while tries <= 3:
+        try:
+            browser.get(link_to_site)
+            content_found = _explicit_wait(browser,"ID","modSdpContent",6)
+            # additional time if explicit wait fails
+            time.sleep(3)
 
-            soup = BeautifulSoup(browser.page_source, 'html.parser')
+            if content_found == True:
 
-            form_and_captcha = _check_form_and_captcha(soup)
-            form_type = form_and_captcha["form_type"]
-            captcha = form_and_captcha["captcha"]
+                soup = BeautifulSoup(browser.page_source, 'html.parser')
 
-            # parser for form1
-            if form_type == "form1" and captcha == "False":
-                results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save)
+                form_and_captcha = _check_form_and_captcha(soup)
+                form_type = form_and_captcha["form_type"]
+                captcha = form_and_captcha["captcha"]
 
-            if form_type == "form1" and captcha == "True":
-                results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True)
+                # parser for form1
+                if form_type == "form1" and captcha == "False":
+                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save)
 
-            # parser for form2
-            if form_type == "form2" and captcha == "False":
-                results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save)
+                if form_type == "form1" and captcha == "True":
+                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True)
 
-            if form_type == "form2" and captcha == "True":
-                results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True)
+                # parser for form2
+                if form_type == "form2" and captcha == "False":
+                    results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save)
 
-            if form_type == "other":
-                results = f"{website} cannot be parsed"
+                if form_type == "form2" and captcha == "True":
+                    results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True)
 
-        else:
-            results = f"Failed to load content of {website}"
+                # no point in trying because websites with other forms are not parsed
+                if form_type == "other":
+                    results = f"{website} cannot be parsed"
+                    
+                # succesful, stop trying
+                break
 
-        
-    except WebDriverException:
-        results = f"{website} cannot be parsed. Web driver error"
+            # no web driver error, but content was not loaded
+            else:
+                tries += 1
+                continue
+
+        # web driver error, try again
+        except WebDriverException:
+            tries += 1
+                continue
+
+    # give up if conent is still not loaded after 3 tries
+    if content_found = False:
+        results = f"Failed to load content of {website}"
     
     browser.close()
     
