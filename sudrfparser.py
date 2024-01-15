@@ -491,7 +491,7 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                 results_per_site[website]["num_cases"] = num_cases
                 results_per_site[website]["cases"] = list_of_cases
                 results_per_site[website]["logs"] = logs
-                
+
                 #try again
                 continue
 
@@ -714,123 +714,146 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
             captcha_addition = _get_captcha_f2(browser,website)
             link_to_site += captcha_addition
 
-        try:
-            browser.get(link_to_site)
-            el_found = _explicit_wait(browser,"ID","resultTable",6)
+        # try to load the website content 3 times
+        tries = 0
 
-            # no cases found (no results, error, or time out)
-            if el_found == False:
-                logs["cases_found"] = "False"
-                logs["driver_error"] = "False"
-                logs["pagination_error"] = []
-                results_per_site[website]["num_cases"] = num_cases
-                results_per_site[website]["cases"] = list_of_cases
-                results_per_site[website]["logs"] = logs
-                    
-            # if there is a table with results
-            else:
-                soup = BeautifulSoup(browser.page_source, 'html.parser')
-                stats = _num_cases_pages_f2(soup)
-                num_cases = stats[0]
-                num_pages = stats[1]
+        while tries <= 3:
+            try:
+                browser.get(link_to_site)
+                # explicitly waiting for the results table
+                el_found = _explicit_wait(browser,"ID","resultTable",6)
 
-                logs["cases_found"] = "True"
-                logs["driver_error"] = "False"
-                logs["pagination_error"] = []
-                results_per_site[website]["num_cases"] = num_cases
+                # if there is a table with results
+                if el_found == True:
 
-                # getting cases on the first page
-                # this will be all the cases for 1 page results
-                # first, getting all the cases ids on the page
-                cases_ids_on_page = _get_cases_ids_per_page_f2(soup)
+                    soup = BeautifulSoup(browser.page_source, 'html.parser')
 
-                # iterating over cases and colecting texts
-                for case_id in cases_ids_on_page:
+                    stats = _num_cases_pages_f2(soup)
+                    num_cases = stats[0]
+                    num_pages = stats[1]
 
-                    case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
-                    browser.get(case_page)
-                    # checking if tabs are loaded
-                    el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
+                    logs["cases_found"] = "True"
+                    logs["driver_error"] = "False"
+                    logs["pagination_error"] = []
+                    results_per_site[website]["num_cases"] = num_cases
 
-                    if el_found == True:
-                        soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-                        # getting case data
-                        results_per_case = _get_one_case_text_f2(soup_case) 
-                        results_per_case["case_id_uid"] = case_id
-                        list_of_cases.append(results_per_case)
+                    # getting cases on the first page
+                    # this will be all the cases for 1 page results
+                    # first, getting all the cases ids on the page
+                    cases_ids_on_page = _get_cases_ids_per_page_f2(soup)
 
-                    else:
-                        results_per_case = {}
-                        results_per_case["case_found"] = "False"
-                        results_per_case["case_id_uid"] = case_id
-                        list_of_cases.append(results_per_case)
+                    # iterating over cases and colecting texts
+                    for case_id in cases_ids_on_page:
 
-                if num_pages > 1:
-                    for i in range(2,num_pages+1):
-                        page_addition = f'&_page={i}'
-                        link_with_page = link_to_site + page_addition
+                        case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
+                        browser.get(case_page)
+                        # checking if tabs are loaded
+                        el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
 
-                        # adding Exception in case of the driver error
-                        try:
-                            browser.get(link_with_page)
-                            el_found = _explicit_wait(browser,"ID","resultTable",6)
-                            
-                            # if there's no table content found
-                            # check if it is because of captcha
-                            if el_found == False and captcha == True and BeautifulSoup(browser.page_source, 'html.parser').find("div", {"id": "error"}):
-                                # getting new captcha
-                                captcha_addition = _get_captcha_f2(browser,website)
-                                link_to_site = website + module_form2 + captcha_addition
-                                link_with_page = link_to_site + page_addition
+                        if el_found == True:
+                            soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                            # getting case data
+                            results_per_case = _get_one_case_text_f2(soup_case) 
+                            results_per_case["case_id_uid"] = case_id
+                            list_of_cases.append(results_per_case)
+
+                        else:
+                            results_per_case = {}
+                            results_per_case["case_found"] = "False"
+                            results_per_case["case_id_uid"] = case_id
+                            list_of_cases.append(results_per_case)
+
+                    if num_pages > 1:
+
+                        for i in range(2,num_pages+1):
+                            page_addition = f'&_page={i}'
+                            link_with_page = link_to_site + page_addition
+
+                            # adding Exception in case of the driver error
+                            try:
                                 browser.get(link_with_page)
-                                # trying one more time
-                                el_found = _explicit_wait(browser,"ID","resultTable", 6)
+                                el_found = _explicit_wait(browser,"ID","resultTable",6)
+                                
+                                # if there's no table content found
+                                # check if it is because of captcha
+                                if el_found == False and captcha == True and BeautifulSoup(browser.page_source, 'html.parser').find("div", {"id": "error"}):
+                                    # getting new captcha
+                                    captcha_addition = _get_captcha_f2(browser,website)
+                                    link_to_site = website + module_form2 + captcha_addition
+                                    link_with_page = link_to_site + page_addition
+                                    browser.get(link_with_page)
+                                    # trying one more time
+                                    el_found = _explicit_wait(browser,"ID","resultTable", 6)
 
-                            if el_found == False:
-                                logs['pagination_error'].append(i)
-                            
-                            # if everything's ok
-                            if el_found == True:
-                                soup = BeautifulSoup(browser.page_source, 'html.parser')
-                                cases_ids_on_page = _get_cases_ids_per_page_f2(soup)
+                                if el_found == False:
+                                    logs['pagination_error'].append(i)
+                                
+                                # if everything's ok
+                                if el_found == True:
+                                    soup = BeautifulSoup(browser.page_source, 'html.parser')
+                                    cases_ids_on_page = _get_cases_ids_per_page_f2(soup)
 
-                                # iterating over cases and colecting texts
-                                for case_id in cases_ids_on_page:
+                                    # iterating over cases and colecting texts
+                                    for case_id in cases_ids_on_page:
 
-                                    case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
-                                    browser.get(case_page)
+                                        case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
+                                        browser.get(case_page)
 
-                                    # checking if tabs are loaded
-                                    el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
-                                    if el_found == True:
-                                        soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-                                        # getting case data
-                                        results_per_case = _get_one_case_text_f2(soup_case)
-                                        results_per_case["case_id_uid"] = case_id
-                                        list_of_cases.append(results_per_case)
-                                    else:
-                                        results_per_case = {}
-                                        results_per_case["case_found"] = "False"
-                                        results_per_case["case_id_uid"] = case_id
-                                        list_of_cases.append(results_per_case)
+                                        # checking if tabs are loaded
+                                        el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
+                                        if el_found == True:
+                                            soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                                            # getting case data
+                                            results_per_case = _get_one_case_text_f2(soup_case)
+                                            results_per_case["case_id_uid"] = case_id
+                                            list_of_cases.append(results_per_case)
+                                        else:
+                                            results_per_case = {}
+                                            results_per_case["case_found"] = "False"
+                                            results_per_case["case_id_uid"] = case_id
+                                            list_of_cases.append(results_per_case)
 
-                        except WebDriverException:
-                            # recording the N of page that couldn't be loaded
-                            logs["driver_error"] = "True"
-                            logs["pagination_error"].append(i)
-                            continue
+                            except WebDriverException:
+                                # recording the N of page that couldn't be loaded
+                                logs["driver_error"] = "True"
+                                logs["pagination_error"].append(i)
+                                # continue to the next page
+                                continue
 
-                # saving data                
+                    # saving data                
+                    results_per_site[website]["cases"] = list_of_cases
+                    results_per_site[website]["logs"] = logs
+
+                    # results are saved, stop trying, break the while loop
+                    break
+
+                # no cases found (no results, error, or time out)
+                else:
+                    tries += 1
+
+                    logs["cases_found"] = "False"
+                    logs["driver_error"] = "False"
+                    logs["pagination_error"] = []
+                    results_per_site[website]["num_cases"] = num_cases
+                    results_per_site[website]["cases"] = list_of_cases
+                    results_per_site[website]["logs"] = logs
+
+                    #try again
+                    continue
+                    
+
+            except WebDriverException:
+                tries += 1
+
+                logs["cases_found"] = "False"
+                logs["driver_error"] = "True"
+                logs["pagination_error"] = []
+                results_per_site[website]["num_cases"] = num_cases
                 results_per_site[website]["cases"] = list_of_cases
                 results_per_site[website]["logs"] = logs
 
-        except WebDriverException:
-            logs["cases_found"] = "False"
-            logs["driver_error"] = "True"
-            logs["pagination_error"] = []
-            results_per_site[website]["num_cases"] = num_cases
-            results_per_site[website]["cases"] = list_of_cases
-            results_per_site[website]["logs"] = logs
+                #try again
+                continue
 
         file_name = f"{path_to_save}{region}_{website.replace('http://','').replace('.sudrf.ru','').replace('.','_').replace('/','')}_{server}_{year}.json"
         
