@@ -896,7 +896,7 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
             continue
 
     # give up if conent is still not loaded after 3 tries
-    if content_found = False:
+    if content_found == False:
         results = f"Failed to load content of {website}"
     
     browser.close()
