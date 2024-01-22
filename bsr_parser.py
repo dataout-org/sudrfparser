@@ -3,9 +3,13 @@ import json
 import urllib
 import re
 import time
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
+import base64
+from IPython.display import Image
 
 ###
 # Functions to parse criminal cases of the first instance from the official portal 'Pravosudie' (https://bsr.sudrf.ru/bigs/portal.html);
@@ -218,9 +222,15 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
 
     return results
 
-def _get_court_website(court_name:str) -> str:
+def _get_court_website(court_name:str) -> tuple:
+    '''
+    Getting court's website address and server numbers by its name
+    Sends a request to the GitHub file sudrf_websites.json
+    court_name: 'str', the name of the court (the names should be = to the neames in sudrf_websites.json)
+    Returns tuple with str and list of str, for example ('website_address', ['1','2'])
+    '''
 
-    court_website = ""
+    info_to_return = ()
     
     court_codes_url = "https://github.com/dataout-org/sudrfparser/raw/main/courts_info/sudrf_websites.json"
     r = requests.get(court_codes_url)
@@ -229,9 +239,9 @@ def _get_court_website(court_name:str) -> str:
     for region_code, courts_info in court_codes.items():
         for court in courts_info:
             if court_name in court["court_name"]:
-                court_website = court["court_website"]
+                info_to_return = (court["court_website"], court["srv"])
                 
-    return court_website
+    return info_to_return
 
 def _get_captcha_from_soup_f1(soup_captcha) -> str:
     '''
@@ -253,21 +263,41 @@ def _get_captcha_from_soup_f1(soup_captcha) -> str:
     return captcha_addition
 
 
-def _get_case_link_f1(soup) -> list:
+def _get_captcha_from_soup_f2(soup_captcha) -> str:
+    '''
+    '''
+    content = soup.find("form", {"class":"form-container"})
+    # getting captcha ID
+    captcha_id = content.find("input", {"name": "captchaid"})["value"]
+
+    for img in content.find_all("img"):
+        if "data" in img["src"]:
+            imgstring = img["src"].split(",")[1]
+
+    imgdata = base64.b64decode(imgstring)
+    display(Image(imgdata, width=400, height=200))
+
+    # entering captcha manually
+    captcha_entered = input("Enter captcha: ")
+    captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
+
+    return captcha_addition
+
+def _get_case_link_f1(soup) -> str:
     '''
     '''
     table_rows = soup.find("table", {"id": "tablcont"}).find_all("tr")
-    case_link = []
+    case_link = ""
     
     for row in table_rows:
         # taking only the first column
         first_cell = row.find("td")
         if first_cell != None:
-            case_link.append(first_cell.find("a")['href'])
+            case_link = first_cell.find("a")['href']
             
     return case_link
 
-def _get_case_by_id_f1(browser, court_website:str, id_text:str, adm_date:str, captcha:str, soup_captcha='') -> dict:
+def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, adm_date:str, captcha:str, soup_captcha='') -> dict:
     '''
     '''
 
@@ -276,33 +306,40 @@ def _get_case_by_id_f1(browser, court_website:str, id_text:str, adm_date:str, ca
     results["case_text"] = ""
     metadata["accused"] = []
 
-    module_case_f1 = f'/modules.php?name=sud_delo&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__CASE_NUMBERSS={id_text}&delo_table=u1_case&u1_case__ENTRY_DATE1D={adm_date}&u1_case__ENTRY_DATE2D={adm_date}'
+    for server in court_srv:
 
-    link_to_search_case = court_website + module_case_f1
+        module_case_f1 = f'/modules.php?name=sud_delo&srv_num={server}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__CASE_NUMBERSS={id_text}&delo_table=u1_case&u1_case__ENTRY_DATE1D={adm_date}&u1_case__ENTRY_DATE2D={adm_date}'
 
-    # checking captcha
-    if captcha == "True":
-        captcha_addition = _get_captcha_from_soup_f1(soup_captcha)
-        link_to_search_case += captcha_addition
+        link_to_search_case = court_website + module_case_f1
 
-    try:
+        # checking captcha
+        if captcha == "True":
+            captcha_addition = _get_captcha_from_soup_f1(soup_captcha)
+            link_to_search_case += captcha_addition
+
         browser.get(link_to_search_case)
         # explicitly waiting for the results table
         el_found = sudrfparser._explicit_wait(browser,"ID","tablcont",6)
+        time.sleep(3)
         soup = BeautifulSoup(browser.page_source, 'html.parser')
+        print("Result page is open")
 
         # case found
         if soup.find("table", {"id": "tablcont"}) != None:
 
             results["case_found"] = "True"
 
-            case_link = _get_case_link_f1(soup)
-            case_id_uid = re.search('case_id=\d*&case_uid=.*&',case_link[0])[0].rstrip('&')
+            case_link = court_website + _get_case_link_f1(soup)
+            case_id_uid = re.search('case_id=\d*&case_uid=.*&',case_link)[0].rstrip('&')
             results["case_id_uid"] = case_id_uid
+            print(f"Case uid is parsed:{case_id_uid}")
         
             # get case info
-            browser.get(case_link[0])
+            print(f"Case link: {case_link}")
+
+            browser.get(case_link)
             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+            print("Case page is open")
 
             # single case page / getting case data
             content = soup_case.find('div', {'class': 'contentt'})
@@ -310,7 +347,7 @@ def _get_case_by_id_f1(browser, court_website:str, id_text:str, adm_date:str, ca
             ### case decision text
             ###
             # checking tabs
-            tabs = content.find("ul", class_="tabs").find_all("li")
+            tabs = soup_case.find("ul", class_="tabs").find_all("li")
 
             for tab in tabs:
                 # getting the tab ID with the case text 
@@ -353,26 +390,30 @@ def _get_case_by_id_f1(browser, court_website:str, id_text:str, adm_date:str, ca
 
             results["metadata"] = metadata
 
+            # break the server iteration
+            break
+
         else:
             results = "Case not found"
-
-    except WebDriverException:
-        results = "Case page cannot be parsed. Web driver error"
+            # continue to search for the case on other servers (if any)
+            continue
 
     return results
 
 
-def _find_one_case_by_id(browser, court_website:str, id_text:str, adm_date:str) -> dict:
+def _find_one_case_by_id(browser, court_website:str, court_srv:list, id_text:str, adm_date:str) -> dict:
     '''
     '''
 
-    link_to_site = court_website + "/modules.php?name=sud_delo&srv_num=1&name_op=sf&delo_id=1540005"
+    # trying the first server
+    link_to_site = court_website + f"/modules.php?name=sud_delo&srv_num={court_srv[0]}&name_op=sf&delo_id=1540005"
 
     try:
         browser.get(link_to_site)
         content_found = sudrfparser._explicit_wait(browser,"ID","modSdpContent",6)
         # additional time if explicit wait fails
         time.sleep(3)
+        print("The website is open")
 
         if content_found == True:
 
@@ -384,10 +425,11 @@ def _find_one_case_by_id(browser, court_website:str, id_text:str, adm_date:str) 
 
             # parser for form1
             if form_type == "form1" and captcha == "False":
-                results = _get_case_by_id_f1(browser,court_website,id_text,adm_date,captcha)
+                print("Form 1 without captcha")
+                results = _get_case_by_id_f1(browser,court_website,court_srv,id_text,adm_date,captcha)
 
             if form_type == "form1" and captcha == "True":
-                results = _get_case_by_id_f1(browser,court_website,id_text,adm_date,captcha,soup)
+                results = _get_case_by_id_f1(browser,court_website,court_srv,id_text,adm_date,captcha,soup)
 
             # parser for form2
             #if form_type == "form2" and captcha == "False":
@@ -399,17 +441,22 @@ def _find_one_case_by_id(browser, court_website:str, id_text:str, adm_date:str) 
         else:
             results = f"Failed to load content of {court_website}"
 
-        
     except WebDriverException:
         results = f"{court_website} cannot be parsed. Web driver error"
-    
-    browser.close()
     
     return results
 
 # the master function
 
 def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> str:
+    '''
+    Takes a dict as an input with cases metadata and serches for cases on court webstes;
+    cases_info: dict, taken from the results file generated with "get_cases_by_keywords";
+    path_to_driver: str, path to Chrome driver;
+    path_to_save: str, directory where to save files and logs, default is "";
+    Saves separate json files with results for each case; saves a json file with logs of failed requests (if any);
+    Returns a status string
+    '''
 
     browser = sudrfparser._set_browser(path_to_driver)
 
@@ -425,16 +472,16 @@ def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> s
 
             id_text = case["metadata"]["id_text"]
             court_name = case["metadata"]["court_name"]
-            court_website = _get_court_website(court_name)
+            court_website_srv = _get_court_website(court_name)
             adm_date = case["metadata"]["adm_date"]
             case_id_bsr = case["case_id_bsr"]
 
-            one_case_data = _find_one_case_by_id(browser,court_website,id_text,adm_date)
+            one_case_data = _find_one_case_by_id(browser,court_website_srv[0],court_website_srv[1],id_text,adm_date)
 
             if type(one_case_data) != str:
 
                 one_case_data["keyword"] = keyword
-                result_one_case["case_id_bsr"] = one_case_data
+                result_one_case[case_id_bsr] = one_case_data
 
                 # saving results per case
                 file_name = f"{path_to_save}/{case_id_bsr}_{adm_date.split('.')[-1]}.json"
@@ -449,10 +496,13 @@ def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> s
                 logs_failed_cases[case_id_bsr] = one_case_data
                 print(f"Case {case_id_bsr} failed")
 
-    # save logs
-    file_name_logs = f"{path_to_save}/failed_cases_{request_id}.json"
-    with open(file_name_logs, 'w') as jf:
-        json.dump(logs_failed_cases, jf)
+    # save logs if any cases are failed
+    if len(logs_failed_cases) > 0:
+        file_name_logs = f"{path_to_save}/failed_cases_{request_id}.json"
+        with open(file_name_logs, 'w') as jf:
+            json.dump(logs_failed_cases, jf)
+
+    browser.close()
 
     return f"Job is finished. Results are saved in {path_to_save}"
 
