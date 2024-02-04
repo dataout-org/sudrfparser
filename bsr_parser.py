@@ -294,7 +294,7 @@ def _get_case_link_f1(soup) -> str:
     for row in table_rows:
         # taking only the first column
         first_cell = row.find("td")
-        if first_cell.find("a") != None:
+        if first_cell != None:
             case_link = first_cell.find("a")["href"]
             
     return case_link
@@ -599,34 +599,41 @@ def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> s
     result_one_case = {}
     logs_failed_cases = {}
 
+    requested = []
+
     for keyword, cases_by_keyword in cases_info.items():
         for case in cases_by_keyword["cases"]:
 
-            id_text = case["metadata"]["id_text"]
-            court_name = case["metadata"]["court_name"]
-            court_website_info = _get_court_website(court_name)
-            adm_date = case["metadata"]["adm_date"]
             case_id_bsr = case["case_id_bsr"]
 
-            one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
+            if case_id_bsr not in requested:
 
-            if type(one_case_data) != str:
+                id_text = case["metadata"]["id_text"]
+                court_name = case["metadata"]["court_name"]
+                court_website_info = _get_court_website(court_name)
+                adm_date = case["metadata"]["adm_date"]
 
-                one_case_data["keyword"] = keyword
-                result_one_case[case_id_bsr] = one_case_data
+                one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
 
-                # saving results per case
-                file_name = f"{path_to_save}/{case_id_bsr}_{adm_date.split('.')[-1]}.json"
+                if type(one_case_data) != str:
 
-                with open(file_name, 'w') as jf:
-                    json.dump(result_one_case, jf, ensure_ascii=False)
+                    one_case_data["keyword"] = keyword
+                    result_one_case[case_id_bsr] = one_case_data
 
-                print(f"Case {case_id_bsr} saved")
+                    # saving results per case
+                    file_name = f"{path_to_save}/{case_id_bsr}_{adm_date.split('.')[-1]}.json"
 
-            # if there are no results
-            else:
-                logs_failed_cases[case_id_bsr] = one_case_data
-                print(f"Case {case_id_bsr} failed")
+                    with open(file_name, 'w') as jf:
+                        json.dump(result_one_case, jf, ensure_ascii=False)
+
+                    print(f"Case {case_id_bsr} saved")
+
+                    requested.append(case_id_bsr)
+
+                # if there are no results
+                else:
+                    logs_failed_cases[case_id_bsr] = one_case_data
+                    print(f"Case {case_id_bsr} failed")
 
     # save logs if any cases are failed
     if len(logs_failed_cases) > 0:
