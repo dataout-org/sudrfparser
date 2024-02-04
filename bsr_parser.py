@@ -222,12 +222,12 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
 
     return results
 
-def _get_court_website(court_name:str) -> tuple:
+def _get_court_website(court_name:str) -> dict:
     '''
     Getting court's website address and server numbers by its name
     Sends a request to the GitHub file sudrf_websites.json
     court_name: 'str', the name of the court (the names should be = to the neames in sudrf_websites.json)
-    Returns tuple with str and list of str, for example ('website_address', ['1','2'])
+    Returns dict, for example ({"court_website":"http://aleysky.alt.sudrf.ru","srv":["1"],"court_id":"22RS0001"})
     '''
 
     info_to_return = ()
@@ -239,7 +239,7 @@ def _get_court_website(court_name:str) -> tuple:
     for region_code, courts_info in court_codes.items():
         for court in courts_info:
             if court_name in court["court_name"]:
-                info_to_return = (court["court_website"], court["srv"])
+                info_to_return = {"court_website":court["court_website"],"srv":court["srv"],"court_id":court["court_id"]}
                 
     return info_to_return
 
@@ -292,10 +292,25 @@ def _get_case_link_f1(soup) -> str:
     for row in table_rows:
         # taking only the first column
         first_cell = row.find("td")
-        if first_cell != None:
-            case_link = first_cell.find("a")['href']
+        if first_cell.find("a") != None:
+            case_link = first_cell.find("a")["href"]
             
     return case_link
+
+def _get_case_link_f2(soup) -> str:
+    '''
+    '''
+    table_rows = soup.find("table", {"class": "law-case-table"}).find_all("tr")
+    case_link = ""
+
+    for row in table_rows:
+        # taking only the first column
+        first_cell = row.find("td")
+        if first_cell.find("a") != None:
+            case_link = first_cell.find("a")["href"]
+
+    return case_link
+
 
 def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, adm_date:str, captcha:str, soup_captcha='') -> dict:
     '''
@@ -401,7 +416,122 @@ def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, 
     return results
 
 
-def _find_one_case_by_id(browser, court_website:str, court_srv:list, id_text:str, adm_date:str) -> dict:
+def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str, id_text:str, adm_date:str, captcha:str, soup_captcha='') -> dict:
+    '''
+    '''
+
+    results = {}
+    metadata = {}
+    results["case_text"] = ""
+    metadata["accused"] = []
+
+    for server in court_srv:
+
+        module_case_f2 = f'/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_id}&case__num_build={server}&case__case_numberss={id_text}&case__judicial_uidss=&parts__namess=&case__entry_date1d={adm_date}&case__entry_date2d={adm_date}&process-type=%CF%E5%F0%E2%E0%FF+%E8%ED%F1%F2%E0%ED%F6%E8%FF'
+
+        link_to_search_case = court_website + module_case_f1
+
+        # checking captcha
+        if captcha == "True":
+            captcha_addition = _get_captcha_from_soup_f2(soup_captcha)
+            link_to_search_case += captcha_addition
+
+        browser.get(link_to_search_case)
+        # explicitly waiting for the results table
+        el_found = sudrfparser._explicit_wait(browser,"ID","resultTable",6)
+        time.sleep(3)
+        soup = BeautifulSoup(browser.page_source, 'html.parser')
+        print("Result page is open")
+
+        # case found
+        if soup.find("table", {"class": "law-case-table"}) != None:
+
+            results["case_found"] = "True"
+
+            case_link = court_website + _get_case_link_f2(soup)
+
+            # getting case_id_uid
+            if "_id=" in case_link:
+                case_id_uid = re.search('_id=\d*&_uid=.+?&',case_link)[0].rstrip('&')
+                # there can be no '_id', just '_uid'
+            else:
+                case_id_uid = re.search('_uid=.+?&',case_link)[0].rstrip('&')
+
+            results["case_id_uid"] = case_id_uid
+            print(f"Case uid is parsed:{case_id_uid}")
+        
+            # get case info
+            print(f"Case link: {case_link}")
+
+            browser.get(case_link)
+            soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+            print("Case page is open")
+
+            # single case page / getting case data
+            content = soup.find('div', {'id': 'search_results'})
+
+            ### case decision text
+            ###
+            # checking tabs
+            tabs = soup.find("ul", id="case_bookmarks").find_all("li")
+
+            for tab in tabs:
+                ### case decision text
+                if "Судебны" in tab.text:
+                    tab_id = tab.attrs['id'].replace('id','content')
+                    results["case_text"] = content.find('div',{'id':tab_id}).text.replace('"','\'').replace('\xa0','')
+
+                ### accused info
+                if "Лица" in tab.text:
+                    accused_list = []
+                    tab_id = tab.attrs['id'].replace('id','content')
+                    accused_content = content.find('div',{'id':tab_id})
+                    for tr in accused_content.find('table').find_all('tr')[1:]:
+                        name = tr.find_all('td')[0].text
+                        article = []
+                        for td in tr.find_all('td'):
+                            if 'УК РФ' in td.text:
+                                article.extend(td.text.rstrip('УК РФ').split(';'))
+
+                        accused_list.append({'name':name, 'article':article})
+
+                    metadata["accused"] = accused_list
+            ###
+
+            ### case metadata
+            ###
+            # adding already known metadata
+            metadata["id_text"] = id_text
+            metadata["adm_date"] = adm_date
+
+            metadata_1 = content.find('table', {'class':'law-case-table'})
+        
+            for tr in metadata_1.find_all('tr'):
+                # another case identifier
+                if 'идентификатор' in tr.text:
+                    metadata["uid_2"] = tr.find_all('td')[-1].text
+                # judge
+                if 'Судья' in tr.text:
+                    metadata["judge"] = tr.find_all('td')[-1].text
+                # case status
+                if 'Результат' in tr.text:
+                    metadata["decision_result"] = tr.find_all('td')[-1].text
+            ###
+
+            results["metadata"] = metadata
+
+            # break the server iteration
+            break
+
+        else:
+            results = "Case not found"
+            # continue to search for the case on other servers (if any)
+            continue
+
+    return results
+
+
+def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:str, id_text:str, adm_date:str) -> dict:
     '''
     '''
 
@@ -432,8 +562,8 @@ def _find_one_case_by_id(browser, court_website:str, court_srv:list, id_text:str
                 results = _get_case_by_id_f1(browser,court_website,court_srv,id_text,adm_date,captcha,soup)
 
             # parser for form2
-            #if form_type == "form2" and captcha == "False":
-                # TO-DO
+            if form_type == "form2" and captcha == "False":
+                results = _get_case_by_id_f2(browser,court_website,court_srv,court_id,id_text,adm_date,captcha)
 
             #if form_type == "form2" and captcha == "True":
                 # TO-DO
@@ -472,11 +602,11 @@ def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> s
 
             id_text = case["metadata"]["id_text"]
             court_name = case["metadata"]["court_name"]
-            court_website_srv = _get_court_website(court_name)
+            court_website_info = _get_court_website(court_name)
             adm_date = case["metadata"]["adm_date"]
             case_id_bsr = case["case_id_bsr"]
 
-            one_case_data = _find_one_case_by_id(browser,court_website_srv[0],court_website_srv[1],id_text,adm_date)
+            one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
 
             if type(one_case_data) != str:
 
