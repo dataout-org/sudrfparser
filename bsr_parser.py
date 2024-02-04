@@ -232,6 +232,8 @@ def _get_court_website(court_name:str) -> dict:
     Returns dict, for example ({"court_website":"http://aleysky.alt.sudrf.ru","srv":["1"],"court_id":"22RS0001"})
     '''
 
+    court_name = court_name.replace('  ',' ') # remove extra space in some court names
+
     info_to_return = {}
     
     court_codes_url = "https://github.com/dataout-org/sudrfparser/raw/main/courts_info/sudrf_websites.json"
