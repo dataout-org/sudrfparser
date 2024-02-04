@@ -468,12 +468,12 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
             print("Case page is open")
 
             # single case page / getting case data
-            content = soup.find('div', {'id': 'search_results'})
+            content = soup_case.find('div', {'id': 'search_results'})
 
             ### case decision text
             ###
             # checking tabs
-            tabs = soup.find("ul", id="case_bookmarks").find_all("li")
+            tabs = soup_case.find("ul", id="case_bookmarks").find_all("li")
 
             for tab in tabs:
                 ### case decision text
