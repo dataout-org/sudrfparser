@@ -208,6 +208,7 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
                             time.sleep(5)
 
         else:
+            print("explicit wait fails")
             results_per_keyword = "request_failed"
 
         browser.close()
@@ -581,7 +582,7 @@ def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:st
 def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> str:
     '''
     Takes a dict as an input with cases metadata and serches for cases on court webstes;
-    cases_info: dict, taken from the results file generated with "get_cases_by_keywords";
+    cases_info: dict, taken from the results file generated with "get_cases_links";
     path_to_driver: str, path to Chrome driver;
     path_to_save: str, directory where to save files and logs, default is "";
     Saves separate json files with results for each case; saves a json file with logs of failed requests (if any);
