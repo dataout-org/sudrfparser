@@ -212,8 +212,6 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
         else:
             results_per_keyword = "request_failed"
 
-        browser.close()
-
         results_per_keyword["cases"] = all_cases_per_keyword
         results[keyword] = results_per_keyword
 
@@ -221,6 +219,8 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
         results_file_name = f"{path_to_save}/cases_links_{request_id}.json"
         with open(results_file_name, 'w') as jf:
             json.dump(results, jf, ensure_ascii=False)
+
+    browser.close()
 
     return results
 
