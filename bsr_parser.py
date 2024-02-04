@@ -266,7 +266,7 @@ def _get_captcha_from_soup_f1(soup_captcha) -> str:
 def _get_captcha_from_soup_f2(soup_captcha) -> str:
     '''
     '''
-    content = soup.find("form", {"class":"form-container"})
+    content = soup_captcha.find("form", {"class":"form-container"})
     # getting captcha ID
     captcha_id = content.find("input", {"name": "captchaid"})["value"]
 
