@@ -429,7 +429,7 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
 
         module_case_f2 = f'/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_id}&case__num_build={server}&case__case_numberss={id_text}&case__judicial_uidss=&parts__namess=&case__entry_date1d={adm_date}&case__entry_date2d={adm_date}&process-type=%CF%E5%F0%E2%E0%FF+%E8%ED%F1%F2%E0%ED%F6%E8%FF'
 
-        link_to_search_case = court_website + module_case_f1
+        link_to_search_case = court_website + module_case_f2
 
         # checking captcha
         if captcha == "True":
