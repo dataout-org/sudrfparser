@@ -143,6 +143,8 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
         request_link_encoded = urllib.parse.quote(request_link,safe='/:#,=&')
 
         browser.get(request_link_encoded)
+        # additional wait
+        time.sleep(3)
         # checking if the content is loaded and visible
         check_content = sudrfparser._explicit_wait(browser,"CLASS_NAME","resultsList", 30)
 
@@ -208,7 +210,6 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
                             time.sleep(5)
 
         else:
-            print("explicit wait fails")
             results_per_keyword = "request_failed"
 
         browser.close()
