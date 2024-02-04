@@ -565,8 +565,8 @@ def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:st
             if form_type == "form2" and captcha == "False":
                 results = _get_case_by_id_f2(browser,court_website,court_srv,court_id,id_text,adm_date,captcha)
 
-            #if form_type == "form2" and captcha == "True":
-                # TO-DO
+            if form_type == "form2" and captcha == "True":
+                results = _get_case_by_id_f2(browser,court_website,court_srv,court_id,id_text,adm_date,captcha,soup)
 
         else:
             results = f"Failed to load content of {court_website}"
