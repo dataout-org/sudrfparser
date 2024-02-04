@@ -215,14 +215,14 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
         results_per_keyword["cases"] = all_cases_per_keyword
         results[keyword] = results_per_keyword
 
-        # save a json file
-        results_file_name = f"{path_to_save}/cases_links_{request_id}.json"
-        with open(results_file_name, 'w') as jf:
-            json.dump(results, jf, ensure_ascii=False)
+    # save a json file
+    results_file_name = f"{path_to_save}/cases_links_{request_id}.json"
+    with open(results_file_name, 'w') as jf:
+        json.dump(results, jf, ensure_ascii=False)
 
     browser.close()
 
-    return results
+    return f"Results are saved in {path_to_save}"
 
 def _get_court_website(court_name:str) -> dict:
     '''
