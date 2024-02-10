@@ -355,7 +355,7 @@ def _get_captcha_f1(browser,website:str,autocaptcha="") -> str:
 
             # checking if API key is present for autorecognition of captcha
             if autocaptcha != "":
-                captcha_guessed = _get_autocaptcha(autocaptcha,imgdata)
+                captcha_guessed = _get_autocaptcha(autocaptcha,imgstring)
 
                 # failed, enter captcha manually
                 if captcha_guessed == "":
@@ -723,7 +723,7 @@ def _get_captcha_f2(browser,website:str,autocaptcha="") -> str:
 
             # checking if API key is present for autorecognition of captcha
             if autocaptcha != "":
-                captcha_guessed = _get_autocaptcha(autocaptcha,imgdata)
+                captcha_guessed = _get_autocaptcha(autocaptcha,imgstring)
 
                 # failed, enter captcha manually
                 if captcha_guessed == "":
