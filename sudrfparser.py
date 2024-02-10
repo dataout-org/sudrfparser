@@ -357,8 +357,8 @@ def _get_captcha_f1(browser,website:str,autocaptcha="") -> str:
             if autocaptcha != "":
                 captcha_guessed = _get_autocaptcha(autocaptcha,imgstring)
 
-                # failed, enter captcha manually
-                if len(captcha_guessed) < 5:
+                # failed (more than 5 symbols or no pattern with 5 numbers), enter captcha manually
+                if len(captcha_guessed) != 5 or re.search('\d{5}',captcha_guessed) == None:
 
                     print("Autorecognition of captcha failed. Enter captcha manually")
                     # enlarging the captcha image
@@ -725,8 +725,8 @@ def _get_captcha_f2(browser,website:str,autocaptcha="") -> str:
             if autocaptcha != "":
                 captcha_guessed = _get_autocaptcha(autocaptcha,imgstring)
 
-                # failed (captcha should be 5 symbols), enter captcha manually
-                if len(captcha_guessed) < 5:
+                # failed (more than 5 symbols or no pattern with 5 numbers), enter captcha manually
+                if len(captcha_guessed) != 5 or re.search('\d{5}',captcha_guessed) == None:
 
                     print("Autorecognition of captcha failed. Enter captcha manually")
                     # enlarging the captcha image
