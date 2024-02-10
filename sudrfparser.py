@@ -298,11 +298,37 @@ def _get_one_case_text_f1(soup) -> dict:
 
     return results
 
-def _get_captcha_f1(browser,website:str) -> str:
+
+def _get_autocaptcha(apikey:str,base64Image:str) -> str:
+    '''
+    Getting the captcha value automatically using OCR API from https://ocr.space/OCRAPI
+    apikey: str, API key provided by https://ocr.space/OCRAPI;
+    base64Image: str, captcha image data;
+    Returns str
+    '''
+
+    auto_captcha = ""
+
+    img_data = f"data:image/jpeg;base64,{base64Image}"
+
+    params = {"apikey": apikey, "OCREngine":"2", "base64Image":img_data}
+    r = requests.post('https://api.ocr.space/parse/image',data=params)
+    parsed = r.json()
+
+    # parsed successfully
+    if parsed['IsErroredOnProcessing'] == False:
+        if parsed.get('ParsedResults') != None:
+            auto_captcha = parsed['ParsedResults'][0]['ParsedText']
+
+    return auto_captcha
+
+
+def _get_captcha_f1(browser,website:str,autocaptcha="") -> str:
     '''
     Getting captcha code of form1 and displaying it; requires user's input;
     browser: selenium.webdriver.chrome.webdriver.WebDriver (the output of '_set_browser');
     website: str, website address;
+    autocaptcha: str, API key from https://ocr.space/OCRAPI to guess captcha automatically, default '';
     Returns str, an addition to the link with captcha code;
     '''
     page_with_code = website + "/modules.php?name=sud_delo&srv_num=1&name_op=sf&delo_id=1540005"
@@ -326,12 +352,28 @@ def _get_captcha_f1(browser,website:str) -> str:
 
             imgstring = content.find("img")["src"].split(",")[1]
             imgdata = base64.b64decode(imgstring)
-            # enlarging the captcha image
-            display(Image(imgdata, width=400, height=200))
 
-            # entering captcha manually
-            captcha_entered = input("Enter captcha: ")
-            captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
+            # checking if API key is present for autorecognition of captcha
+            if autocaptcha != "":
+                captcha_guessed = _get_autocaptcha(autocaptcha,imgdata)
+
+                # failed, enter captcha manually
+                if captcha_guessed == "":
+
+                    print("Autorecognition of captcha failed. Enter captcha manually")
+                    # enlarging the captcha image
+                    display(Image(imgdata, width=400, height=200))
+                    # entering captcha manually
+                    captcha_guessed = input("Enter captcha: ")
+
+            # if no API key
+            else:
+                # enlarging the captcha image
+                display(Image(imgdata, width=400, height=200))
+                # entering captcha manually
+                captcha_guessed = input("Enter captcha: ")
+
+            captcha_addition = f"&captcha={captcha_guessed}&captchaid={captcha_id}"
 
             # success, stop trying
             break
@@ -345,7 +387,7 @@ def _get_captcha_f1(browser,website:str) -> str:
             
     return captcha_addition
 
-def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False) -> dict:
+def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False, autocaptcha="") -> dict:
     '''
     Getting all court cases on one website in the indicated date range
     website: str, website address;
@@ -357,7 +399,8 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
     path_to_driver: str, path to Chrome driver;
     srv_num: list, servers where to look for cases, default ['1']; one website can have multiple servers with criminal cases of the first instance;
     path_to_save: str, path where to save the results, default '' (the same directory of the script execution);
-    captcha: bool, if a website has captcha protection, default False; automatically checks if captcha is present, and if it's present, a user will be asked to solve it;
+    captcha: bool, if a website has captcha protection, default False; automatically checks if captcha is present, and if it's present: (1) a user will be asked to solve it or (2) if a user has API key from https://ocr.space/OCRAPI to guess captcha automatically, the captcha will be autorecognised;
+    autocaptcha: str, API key from https://ocr.space/OCRAPI to guess captcha automatically, default ''; 
     Saves json files with all parsed cases per website's server (for example, if there are 2 servers on one website, there will be 2 json files); Logs errors and pages that were not parsed;
     Returns a dict with info about N cases found per server
     '''
@@ -383,7 +426,7 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
 
         # checking captcha
         if captcha == True:
-            captcha_addition = _get_captcha_f1(browser,website)
+            captcha_addition = _get_captcha_f1(browser,website,autocaptcha)
             link_to_site += captcha_addition
 
         # try to load the website content 3 times
@@ -440,7 +483,7 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                                 # checking if session is expired when captcha is True
                                 if captcha == True and soup.find("div", {"id": "error"}):
                                     # getting new captcha
-                                    captcha_addition = _get_captcha_f1(browser,website)
+                                    captcha_addition = _get_captcha_f1(browser,website,autocaptcha)
                                     link_to_site = website + module_form1 + captcha_addition
                                     link_with_page = link_to_site + page_addition
                                     browser.get(link_with_page)
@@ -646,11 +689,12 @@ def _get_one_case_text_f2(soup) -> dict:
 
     return results
 
-def _get_captcha_f2(browser,website:str) -> str:
+def _get_captcha_f2(browser,website:str,autocaptcha="") -> str:
     '''
     Getting captcha code of form2 and displaying it; requires user's input;
     browser: selenium.webdriver.chrome.webdriver.WebDriver (the output of '_set_browser');
     website: str, website address;
+    autocaptcha: str, API key from https://ocr.space/OCRAPI to guess captcha automatically, default ''; 
     Returns str, an addition to the link with captcha code;
     '''
     page_with_code = website + "/modules.php?name=sud_delo&name_op=sf&srv_num=1"
@@ -676,12 +720,28 @@ def _get_captcha_f2(browser,website:str) -> str:
                     imgstring = img["src"].split(",")[1]
 
             imgdata = base64.b64decode(imgstring)
-            display(Image(imgdata, width=400, height=200))
 
-            # entering captcha manually
-            captcha_entered = input("Enter captcha: ")
+            # checking if API key is present for autorecognition of captcha
+            if autocaptcha != "":
+                captcha_guessed = _get_autocaptcha(autocaptcha,imgdata)
 
-            captcha_addition = f"&captcha={captcha_entered}&captchaid={captcha_id}"
+                # failed, enter captcha manually
+                if captcha_guessed == "":
+
+                    print("Autorecognition of captcha failed. Enter captcha manually")
+                    # enlarging the captcha image
+                    display(Image(imgdata, width=400, height=200))
+                    # entering captcha manually
+                    captcha_guessed = input("Enter captcha: ")
+
+            # if no API key
+            else:
+                # enlarging the captcha image
+                display(Image(imgdata, width=400, height=200))
+                # entering captcha manually
+                captcha_guessed = input("Enter captcha: ")
+
+            captcha_addition = f"&captcha={captcha_guessed}&captchaid={captcha_id}"
 
             # success, stop trying
             break
@@ -696,7 +756,7 @@ def _get_captcha_f2(browser,website:str) -> str:
     return captcha_addition
 
 
-def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False) -> dict:
+def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False, autocaptcha="") -> dict:
     '''
     Getting all court cases on one website in the indicated date range
     website: str, website address;
@@ -709,7 +769,8 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
     path_to_driver: str, path to Chrome driver;
     srv_num: list, servers where to look for cases, default ['1']; one website can have multiple servers with criminal cases of the first instance;
     path_to_save: str, path where to save the results, default '' (the same directory of the script execution);
-    captcha: bool, if a website has captcha protection, default False; automatically checks if captcha is present, and if it's present, a user will be asked to solve it;
+    captcha: bool, if a website has captcha protection, default False; automatically checks if captcha is present, and if it's present: (1) a user will be asked to solve it or (2) if a user has API key from https://ocr.space/OCRAPI to guess captcha automatically, the captcha will be autorecognised;
+    autocaptcha: str, API key from https://ocr.space/OCRAPI to guess captcha automatically, default ''; 
     Saves json files with all parsed cases per website's server (for example, if there are 2 servers on one website, there will be 2 json files); Logs errors and pages that were not parsed;
     Returns a dict with info about N cases found per server
     '''
@@ -734,7 +795,7 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
 
         # checking captcha
         if captcha == True:
-            captcha_addition = _get_captcha_f2(browser,website)
+            captcha_addition = _get_captcha_f2(browser,website,autocaptcha)
             link_to_site += captcha_addition
 
         # try to load the website content 3 times
@@ -801,7 +862,7 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
                                 # check if it is because of captcha
                                 if el_found == False and captcha == True and BeautifulSoup(browser.page_source, 'html.parser').find("div", {"id": "error"}):
                                     # getting new captcha
-                                    captcha_addition = _get_captcha_f2(browser,website)
+                                    captcha_addition = _get_captcha_f2(browser,website,autocaptcha)
                                     link_to_site = website + module_form2 + captcha_addition
                                     link_with_page = link_to_site + page_addition
                                     browser.get(link_with_page)
@@ -892,7 +953,7 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
 
 ### The main parser function ###
 
-def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, court_code="", srv_num=['1'], path_to_save=""):
+def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, court_code="", srv_num=['1'], path_to_save="", apikey=""):
     '''
     Getting texts of court decisions with metadata on one website for the indicated date range
     region: str, region code; use keys in 'https://github.com/dataout-org/sudrfparser/blob/main/courts_info/sudrf_websites.json'
@@ -904,6 +965,7 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
     court_code: str, required for form2 websites; to retrieve the codes, use 'https://raw.githubusercontent.com/dataout-org/sudrfparser/main/courts_info/sudrf_websites.json'; default '';
     srv_num: list, servers where to look for cases, default ['1']; one website can have multiple servers with criminal cases of the first instance;
     path_to_save: str, path where to save the results, default '' (the same directory of the script execution; note that there can be a lot of large json files);
+    apikey: str, API key for autorecognition of captcha from https://ocr.space/OCRAPI; default ''; keep default if entering captcha manually;
     Saves json files with all parsed cases per website's server (for example, if there are 2 servers on one website, there will be 2 json files); Logs errors and pages that were not parsed;
     Returns a dict with info about N cases found per server (if parsed successfully); returns a status str if parsing is failed;
     '''
@@ -938,14 +1000,14 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
                     results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save)
 
                 if form_type == "form1" and captcha == "True":
-                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True)
+                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True, autocaptcha=apikey)
 
                 # parser for form2
                 if form_type == "form2" and captcha == "False":
                     results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save)
 
                 if form_type == "form2" and captcha == "True":
-                    results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True)
+                    results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True, autocaptcha=apikey)
 
                 # no point in trying because websites with other forms are not parsed
                 if form_type == "other":
@@ -1002,7 +1064,7 @@ def _get_missing_pages(dir_path:str,region_code:str,year:str) -> tuple:
     return (n_missed_pages,sites_with_pagination_errors)
 
 
-def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:str) -> list:
+def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:str,apikey="") -> list:
     '''
     Handling missing pages by region and year: checking whether the result json files have missing pages and requesting cases on them;
     This function adds missing cases to the same resulting file (it overwrites files);
@@ -1011,6 +1073,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
     year: str, year in the results json files, for which to check missing pages;
     (for example, the file '50_chehov_mo_1_2019.json' has the region code '50' and the year is '2019')
     path_to_driver: str, path to Chrome driver;
+    apikey: str, API key for autorecognition of captcha from https://ocr.space/OCRAPI; default ''; keep default if entering captcha manually
     Returns a list with logs of N cases added per file
     '''
 
@@ -1057,7 +1120,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
 
                 # check captcha
                 if captcha == "True":
-                    captcha_addition = _get_captcha_f1(browser,website)
+                    captcha_addition = _get_captcha_f1(browser,website,apikey)
                     link_to_site += captcha_addition
                 
                 # collecting cases IDs per page
@@ -1107,7 +1170,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
 
                 # checking captcha
                 if captcha == "True":
-                    captcha_addition = _get_captcha_f2(browser,website)
+                    captcha_addition = _get_captcha_f2(browser,website,apikey)
                     link_to_site += captcha_addition
 
                 # collecting cases IDs per page
