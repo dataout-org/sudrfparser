@@ -22,7 +22,7 @@ from IPython.display import Image
 def _get_case_text_and_metadata(browser) -> dict:
     '''
     Getting text and metadata of a single case from the case page
-    A subfunction for "get_cases_by_keywords"
+    A subfunction for "_get_case_from_bsr"
     '''
 
     case_info = {}
@@ -35,18 +35,23 @@ def _get_case_text_and_metadata(browser) -> dict:
     ### accused info
     accused_list = []
     soup = BeautifulSoup(browser.page_source, 'html.parser')
-    accused_content = soup.find("div",{"class":"sudrf-dt"}).find_all('tr')
 
-    for tr in accused_content[1:]:
-        accussed_dict = {}
-        accussed_dict["name"] = tr.find_all('td')[0].text
-        
-        # ensuring that the table column contains articles and not other info by checking "УК РФ" in text
-        for td in tr.find_all("td"):
-            if "УК РФ" in td.text:
-                accussed_dict["article"] = td.text.rstrip("УК РФ").split(';')
+    # check if there's table with accused info
+    accused_table = soup.find("div",{"class":"sudrf-dt"})
+    if accused_table != None:
+
+        accused_content = accused_table.find_all('tr')
+
+        for tr in accused_content[1:]:
+            accussed_dict = {}
+            accussed_dict["name"] = tr.find_all('td')[0].text
             
-        accused_list.append(accussed_dict)
+            # ensuring that the table column contains articles and not other info by checking "УК РФ" in text
+            for td in tr.find_all("td"):
+                if "УК РФ" in td.text:
+                    accussed_dict["article"] = td.text.rstrip("УК РФ").split(';')
+                
+            accused_list.append(accussed_dict)
 
     case_info["metadata"]["accused"] = accused_list
     
@@ -65,6 +70,7 @@ def _get_case_text_and_metadata(browser) -> dict:
     # save text
     case_text = soup.find("body").text.replace('"','\'').replace('\xa0','')
     case_info["case_text"] = case_text
+    case_info["case_found"] = "True"
 
     return case_info
 
@@ -413,7 +419,7 @@ def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, 
             break
 
         else:
-            results = "Case not found"
+            print("Case not found")
             # continue to search for the case on other servers (if any)
             continue
 
@@ -528,7 +534,7 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
             break
 
         else:
-            results = "Case not found"
+            print("Case not found")
             # continue to search for the case on other servers (if any)
             continue
 
@@ -538,6 +544,8 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
 def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:str, id_text:str, adm_date:str) -> dict:
     '''
     '''
+
+    results = {}
 
     # trying the first server
     link_to_site = court_website + f"/modules.php?name=sud_delo&srv_num={court_srv[0]}&name_op=sf&delo_id=1540005"
@@ -559,7 +567,6 @@ def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:st
 
             # parser for form1
             if form_type == "form1" and captcha == "False":
-                print("Form 1 without captcha")
                 results = _get_case_by_id_f1(browser,court_website,court_srv,id_text,adm_date,captcha)
 
             if form_type == "form1" and captcha == "True":
@@ -573,21 +580,56 @@ def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:st
                 results = _get_case_by_id_f2(browser,court_website,court_srv,court_id,id_text,adm_date,captcha,soup)
 
         else:
-            results = f"Failed to load content of {court_website}"
+            print(f"Failed to load content of {court_website}")
 
     except WebDriverException:
-        results = f"{court_website} cannot be parsed. Web driver error"
+        print(f"{court_website} cannot be parsed. Web driver error")
     
+    return results
+
+
+def _get_case_from_bsr(browser, case_link:str) -> dict:
+    '''
+    Retrieving single case text and metadata from bsr by case link
+    case_link: str, case_url from the output file of get_cases_links
+    '''
+
+    results = {}
+
+    # encoding case url
+    link = urllib.parse.quote(case_link,safe='/:#,=&')
+
+    # opening bsr case in a new tab, so they load properly
+    browser.execute_script("window.open('');")
+    browser.switch_to.window(browser.window_handles[1])
+
+    # opening case link
+    browser.get(link)
+
+    check_content = sudrfparser._explicit_wait(browser,"CLASS_NAME","documentInner",10)
+    # additional wait
+    time.sleep(3)
+
+    # if case data is present
+    if check_content == True:
+        # parsing the case data
+        results = _get_case_text_and_metadata(browser)
+
+    # closing the tab with case and switching to the first tab
+    browser.close()
+    browser.switch_to.window(browser.window_handles[0])
+
     return results
 
 # the master function
 
-def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> str:
+def get_case(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to_ignore=[]) -> str:
     '''
     Takes a dict as an input with cases metadata and serches for cases on court webstes;
     cases_info: dict, taken from the results file generated with "get_cases_links";
     path_to_driver: str, path to Chrome driver;
     path_to_save: str, directory where to save files and logs, default is "";
+    cases_ids_to_ignore: list, cases ID (case_id_bsr), which won't be saved (for example, when results for these cases were already saved before), default is [];
     Saves separate json files with results for each case; saves a json file with logs of failed requests (if any);
     Returns a status string
     '''
@@ -599,11 +641,16 @@ def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> s
     request_id = f"{timestamp[4]}-{timestamp[3]}-{timestamp[2]}-{timestamp[1]}-{timestamp[0]}"
 
     result_one_case = {}
+    failed_cases = []
     logs_failed_cases = {}
 
+    # there can be duplicates, this list stores all requested cases (case_id_bsr per request), so they're not requested again
     requested = []
+    # cases to ignore are also stored here
+    requested.extend(cases_ids_to_ignore)
 
     for keyword, cases_by_keyword in cases_info.items():
+
         for case in cases_by_keyword["cases"]:
 
             case_id_bsr = case["case_id_bsr"]
@@ -615,30 +662,61 @@ def find_cases_by_ids(cases_info:dict, path_to_driver:str, path_to_save="") -> s
                 court_website_info = _get_court_website(court_name)
                 adm_date = case["metadata"]["adm_date"]
 
-                one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
+                ### 1. Try to parse cases text and metadata from bsr
 
-                if type(one_case_data) != str:
+                one_case_data = _get_case_from_bsr(browser, case["case_url"])
 
+                # no results
+                if len(one_case_data) == 0:
+                    
+                    ### 2. Try to find the case text and metadata on a court website
+
+                    one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
+
+                    # again no results
+                    if len(one_case_data) == 0:
+                        failed_cases.append(case_id_bsr)
+                        print(f"Case {case_id_bsr} failed")
+
+                    # success; the case was found on court's website, save the case data
+                    else:
+                        one_case_data["keyword"] = keyword
+                        result_one_case[case_id_bsr] = one_case_data
+
+                        # saving results per case
+                        file_name = f"{path_to_save}/{case_id_bsr}_{adm_date.split('.')[-1]}.json"
+
+                        with open(file_name, 'w') as jf:
+                            json.dump(result_one_case, jf, ensure_ascii=False)
+
+                        print(f"Case {case_id_bsr} saved")
+                        requested.append(case_id_bsr)
+
+                # success; the case was found on the bsr website
+                else:
+                    # adding already known metadata
+                    one_case_data["case_id_uid"] = "" # no case_id_uid on bsr, keep empty
+                    one_case_data["metadata"]["id_text"] = id_text
+                    one_case_data["metadata"]["adm_date"] = adm_date
+                    one_case_data["metadata"]["decision_result"] = case["metadata"]["decision_result"]
+                    # there's no case uid on bsr website, so keep it empty
+                    one_case_data["metadata"]["uid_2"] = ""
                     one_case_data["keyword"] = keyword
-                    result_one_case[case_id_bsr] = one_case_data
 
-                    # saving results per case
+                    # saving case data
+                    result_one_case[case_id_bsr] = one_case_data
                     file_name = f"{path_to_save}/{case_id_bsr}_{adm_date.split('.')[-1]}.json"
 
                     with open(file_name, 'w') as jf:
                         json.dump(result_one_case, jf, ensure_ascii=False)
 
                     print(f"Case {case_id_bsr} saved")
-
                     requested.append(case_id_bsr)
 
-                # if there are no results
-                else:
-                    logs_failed_cases[case_id_bsr] = one_case_data
-                    print(f"Case {case_id_bsr} failed")
-
     # save logs if any cases are failed
-    if len(logs_failed_cases) > 0:
+    if len(failed_cases) > 0:
+        logs_failed_cases[request_id] = failed_cases
+
         file_name_logs = f"{path_to_save}/failed_cases_{request_id}.json"
         with open(file_name_logs, 'w') as jf:
             json.dump(logs_failed_cases, jf)
