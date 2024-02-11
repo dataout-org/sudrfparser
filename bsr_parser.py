@@ -419,6 +419,7 @@ def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, 
             break
 
         else:
+            results = {}
             print("Case not found")
             # continue to search for the case on other servers (if any)
             continue
@@ -534,6 +535,7 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
             break
 
         else:
+            results = {}
             print("Case not found")
             # continue to search for the case on other servers (if any)
             continue
