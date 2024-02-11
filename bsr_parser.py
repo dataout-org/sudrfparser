@@ -671,8 +671,11 @@ def get_cases(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to
                 if len(one_case_data) == 0:
                     
                     ### 2. Try to find the case text and metadata on a court website
+                    if len(court_website_info) == 0:
+                        print(f"Court {court_name} is not found")
 
-                    one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
+                    else:
+                        one_case_data = _find_one_case_by_id(browser,court_website_info["court_website"],court_website_info["srv"],court_website_info["court_id"],id_text,adm_date)
 
                     # again no results
                     if len(one_case_data) == 0:
