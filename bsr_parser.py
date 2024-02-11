@@ -37,10 +37,10 @@ def _get_case_text_and_metadata(browser) -> dict:
     soup = BeautifulSoup(browser.page_source, 'html.parser')
 
     # check if there's table with accused info
-    accused_table = soup.find("div",{"class":"sudrf-dt"})
-    if accused_table != None:
+    accused_table = soup.find("tr",{"data-name":"u_common_case_defendant_m"})
+    accused_content = accused_table.find_all('tr')
 
-        accused_content = accused_table.find_all('tr')
+    if len(accused_content) > 0:
 
         for tr in accused_content[1:]:
             accussed_dict = {}
@@ -623,7 +623,7 @@ def _get_case_from_bsr(browser, case_link:str) -> dict:
 
 # the master function
 
-def get_case(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to_ignore=[]) -> str:
+def get_cases(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to_ignore=[]) -> str:
     '''
     Takes a dict as an input with cases metadata and serches for cases on court webstes;
     cases_info: dict, taken from the results file generated with "get_cases_links";
@@ -640,7 +640,6 @@ def get_case(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to_
     timestamp = time.localtime()
     request_id = f"{timestamp[4]}-{timestamp[3]}-{timestamp[2]}-{timestamp[1]}-{timestamp[0]}"
 
-    result_one_case = {}
     failed_cases = []
     logs_failed_cases = {}
 
@@ -656,6 +655,8 @@ def get_case(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to_
             case_id_bsr = case["case_id_bsr"]
 
             if case_id_bsr not in requested:
+
+                result_one_case = {}
 
                 id_text = case["metadata"]["id_text"]
                 court_name = case["metadata"]["court_name"]
