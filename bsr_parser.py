@@ -608,7 +608,7 @@ def _get_case_from_bsr(browser, case_link:str) -> dict:
     # opening case link
     browser.get(link)
 
-    check_content = sudrfparser._explicit_wait(browser,"CLASS_NAME","documentInner",12)
+    check_content = sudrfparser._explicit_wait(browser,"CLASS_NAME","documentInner",30)
     # additional wait
     time.sleep(3)
 
