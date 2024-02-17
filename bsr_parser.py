@@ -142,7 +142,7 @@ def get_cases_links(path_to_driver:str, keywords:list, start_date:str, end_date:
         results_per_keyword = {}
         all_cases_per_keyword = []
 
-        # shaping a request link per keyword
+        # shaping a request link per keyword (criminal cases)
         request_link = '''https://bsr.sudrf.ru/bigs/portal.html#{"type":"MULTIQUERY","multiqueryRequest":{"queryRequests":[{"type":"Q","queryRequestRole":"SIMPLE","request":"{\\"query\\":\\"''' + keyword + '''\\",\\"type\\":\\"NEAR\\",\\"mode\\":\\"SIMPLE\\"}","operator":"AND"},{"type":"Q","request":"{\\"mode\\":\\"EXTENDED\\",\\"typeRequests\\":[{\\"fieldRequests\\":[{\\"name\\":\\"case_user_doc_entry_date\\",\\"operator\\":\\"B\\",\\"query\\":\\"''' + start_date + '''T00:00:00\\",\\"sQuery\\":\\"''' + end_date + '''T00:00:00\\",\\"fieldName\\":\\"case_user_doc_entry_date\\"}],\\"mode\\":\\"AND\\",\\"name\\":\\"common\\",\\"typesMode\\":\\"AND\\"}]}","operator":"AND","queryRequestRole":"CATEGORIES"}]},"sorts":[{"field":"score","order":"desc"}],"simpleSearchFieldsBundle":"ug","noOrpho":false,"rows":20}'''
 
         # encoding the request link
@@ -635,6 +635,15 @@ def get_cases(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to
     Saves separate json files with results for each case; saves a json file with logs of failed requests (if any);
     Returns a status string
     '''
+
+    # showing N unique cases to be requested
+    all_cases_ids = []
+    for info in cases_info.values():
+        for case in info["cases"]:
+            all_cases_ids.append(case["case_id_bsr"])
+
+    unique_to_request = [c for c in set(all_cases_ids) if c not in cases_ids_to_ignore]
+    print(f"{len(unique_to_request)} cases to request")
 
     browser = sudrfparser._set_browser(path_to_driver)
 
