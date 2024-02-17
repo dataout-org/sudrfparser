@@ -736,7 +736,7 @@ def get_cases(cases_info:dict, path_to_driver:str, path_to_save="", cases_ids_to
         with open(file_name_logs, 'w') as jf:
             json.dump(logs_failed_cases, jf)
 
-    browser.close()
+    browser.quit()
 
     return f"Job is finished. Results are saved in {path_to_save}"
 
