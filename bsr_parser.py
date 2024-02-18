@@ -347,7 +347,6 @@ def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, 
         el_found = sudrfparser._explicit_wait(browser,"ID","tablcont",6)
         time.sleep(3)
         soup = BeautifulSoup(browser.page_source, 'html.parser')
-        print("Result page is open")
 
         # case found
         if soup.find("table", {"id": "tablcont"}) != None:
@@ -357,14 +356,11 @@ def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, 
             case_link = court_website + _get_case_link_f1(soup)
             case_id_uid = re.search('case_id=\d*&case_uid=.*&',case_link)[0].rstrip('&')
             results["case_id_uid"] = case_id_uid
-            print(f"Case uid is parsed:{case_id_uid}")
         
             # get case info
-            print(f"Case link: {case_link}")
 
             browser.get(case_link)
             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-            print("Case page is open")
 
             # single case page / getting case data
             content = soup_case.find('div', {'class': 'contentt'})
@@ -420,7 +416,6 @@ def _get_case_by_id_f1(browser, court_website:str, court_srv:list, id_text:str, 
 
         else:
             results = {}
-            print("Case not found")
             # continue to search for the case on other servers (if any)
             continue
 
@@ -452,7 +447,6 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
         el_found = sudrfparser._explicit_wait(browser,"ID","resultTable",6)
         time.sleep(3)
         soup = BeautifulSoup(browser.page_source, 'html.parser')
-        print("Result page is open")
 
         # case found
         if soup.find("table", {"class": "law-case-table"}) != None:
@@ -472,11 +466,10 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
             print(f"Case uid is parsed:{case_id_uid}")
         
             # get case info
-            print(f"Case link: {case_link}")
-
             browser.get(case_link)
+            # explicitly waiting for the results table
+            el_found = sudrfparser._explicit_wait(browser,"ID","case_bookmarks",6)
             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-            print("Case page is open")
 
             # single case page / getting case data
             content = soup_case.find('div', {'id': 'search_results'})
@@ -536,7 +529,6 @@ def _get_case_by_id_f2(browser, court_website:str, court_srv:list, court_id:str,
 
         else:
             results = {}
-            print("Case not found")
             # continue to search for the case on other servers (if any)
             continue
 
@@ -557,7 +549,6 @@ def _find_one_case_by_id(browser, court_website:str, court_srv:list, court_id:st
         content_found = sudrfparser._explicit_wait(browser,"ID","modSdpContent",6)
         # additional time if explicit wait fails
         time.sleep(3)
-        print("The website is open")
 
         if content_found == True:
 
