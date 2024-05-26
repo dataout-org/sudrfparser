@@ -229,71 +229,61 @@ def _get_one_case_text_f1(soup) -> dict:
     results = {}
     metadata = {}
     results["case_text"] = ""
+    results["case_found"] = "True"
     metadata["accused"] = []
     metadata["id_text"] = ""
 
     content = soup.find('div', {'class': 'contentt'})
-    
-    ### checking if there's any content
+     
+    ### getting the internal case ID
+    id_text = soup.find('div', {'class': 'casenumber'})
+    if id_text != None:
+        metadata["id_text"] = id_text.text.replace('\n',"").replace('\t',"")
 
-    if content != None:
-        
-        results["case_found"] = "True"
+    ### case decision text
+    ###
+    # checking tabs
+    tabs = soup.find("ul", class_="tabs").find_all("li")
 
-        ### getting the internal case ID
-        id_text = soup.find('div', {'class': 'casenumber'})
-        if id_text != None:
-            metadata["id_text"] = id_text.text.replace('\n',"").replace('\t',"")
+    for tab in tabs:
+        # getting the tab ID with the case text 
+        if " АКТЫ" in tab.text:
+            tab_id = tab.attrs['id'].replace('tab','cont')
+            results["case_text"] = content.find('div',{'id':tab_id}).text.replace('"','\'').replace('\xa0','')
 
-        ### case decision text
+        ### accused info: names and articles
         ###
-        # checking tabs
-        tabs = soup.find("ul", class_="tabs").find_all("li")
-
-        for tab in tabs:
-            # getting the tab ID with the case text 
-            if " АКТЫ" in tab.text:
-                tab_id = tab.attrs['id'].replace('tab','cont')
-                results["case_text"] = content.find('div',{'id':tab_id}).text.replace('"','\'').replace('\xa0','')
-
-            ### accused info: names and articles
-            ###
-            if 'ЛИЦА' in tab.text:
-                accused_list = []
-                tab_id = tab.attrs['id'].replace('tab','cont')
-                accused_content = content.find('div',{'id':tab_id}).find_all('tr')
-                for tr in accused_content[2:]:
-                    accused_list.append({'name':tr.find_all('td')[0].text,\
-                                        'article':tr.find_all('td')[1].text.rstrip('УК РФ').split(';')})
-                metadata["accused"] = accused_list
-            ###
+        if 'ЛИЦА' in tab.text:
+            accused_list = []
+            tab_id = tab.attrs['id'].replace('tab','cont')
+            accused_content = content.find('div',{'id':tab_id}).find_all('tr')
+            for tr in accused_content[2:]:
+                accused_list.append({'name':tr.find_all('td')[0].text,\
+                                    'article':tr.find_all('td')[1].text.rstrip('УК РФ').split(';')})
+            metadata["accused"] = accused_list
         ###
+    ###
 
-        ### case metadata
-        ###
-        metadata_1 = content.find('div', {'id': 'cont1'})
-    
-        for tr in metadata_1.find('table').find_all('tr'):
-            # another case identifier
-            if 'идентификатор' in tr.text:
-                metadata["uid_2"] = tr.find_all('td')[-1].text
-            # receipt date
-            if 'Дата поступления' in tr.text:
-                metadata["adm_date"] = tr.find_all('td')[-1].text
-            # judge
-            if 'Судья' in tr.text:
-                metadata["judge"] = tr.find_all('td')[-1].text
-            # case status
-            if 'Результат' in tr.text:
-                metadata["decision_result"] = tr.find_all('td')[-1].text
-        ###   
+    ### case metadata
+    ###
+    metadata_1 = content.find('div', {'id': 'cont1'})
 
-        results["metadata"] = metadata
+    for tr in metadata_1.find('table').find_all('tr'):
+        # another case identifier
+        if 'идентификатор' in tr.text:
+            metadata["uid_2"] = tr.find_all('td')[-1].text
+        # receipt date
+        if 'Дата поступления' in tr.text:
+            metadata["adm_date"] = tr.find_all('td')[-1].text
+        # judge
+        if 'Судья' in tr.text:
+            metadata["judge"] = tr.find_all('td')[-1].text
+        # case status
+        if 'Результат' in tr.text:
+            metadata["decision_result"] = tr.find_all('td')[-1].text
+    ###   
 
-
-    # no content found
-    else:
-        results["case_found"] = "False"
+    results["metadata"] = metadata
 
     return results
 
@@ -461,13 +451,35 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
 
                         case_page = f"{website}/modules.php?name=sud_delo&srv_num={server}&name_op=case&{case_id}&delo_id=1540006"
                         browser.get(case_page)
-                        tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
-                        soup_case = BeautifulSoup(browser.page_source, 'html.parser')
 
-                        # getting case data
-                        results_per_case = _get_one_case_text_f1(soup_case)
-                        results_per_case["case_id_uid"] = case_id
-                        list_of_cases.append(results_per_case)
+                        # trying to retrieve case content
+
+                        tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
+
+                        tries_case = 0
+                        while tries_case <= 3:
+
+                            soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                            content = soup_case.find('div', {'class': 'contentt'})
+
+                            if content != None:
+
+                                # getting case data
+                                results_per_case = _get_one_case_text_f1(soup_case)
+                                results_per_case["case_id_uid"] = case_id
+                                list_of_cases.append(results_per_case)
+
+                                # success
+                                break
+
+                            else:
+                                tries_case += 1
+                                results_per_case = {"case_text": "", "case_found": "False"}
+                                results_per_case["case_id_uid"] = case_id
+                                list_of_cases.append(results_per_case)
+
+                                # failed, try again
+                                continue
 
                     if num_pages > 1:
 
@@ -501,14 +513,35 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                                     for case_id in cases_ids_on_page:
                                         case_page = f"{website}/modules.php?name=sud_delo&srv_num={server}&name_op=case&{case_id}&delo_id=1540006"
                                         browser.get(case_page)
+
+                                        # trying to retrieve case content
+
                                         tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
 
-                                        soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                                        tries_case = 0
+                                        while tries_case <= 3:
 
-                                        # getting case data
-                                        results_per_case = _get_one_case_text_f1(soup_case)
-                                        results_per_case["case_id_uid"] = case_id
-                                        list_of_cases.append(results_per_case)
+                                            soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                                            content = soup_case.find('div', {'class': 'contentt'})
+
+                                            if content != None:
+
+                                                # getting case data
+                                                results_per_case = _get_one_case_text_f1(soup_case)
+                                                results_per_case["case_id_uid"] = case_id
+                                                list_of_cases.append(results_per_case)
+
+                                                # success
+                                                break
+
+                                            else:
+                                                tries_case += 1
+                                                results_per_case = {"case_text": "", "case_found": "False"}
+                                                results_per_case["case_id_uid"] = case_id
+                                                list_of_cases.append(results_per_case)
+
+                                                # failed, try again
+                                                continue
 
                             except WebDriverException:
                                 # recording the N of page that couldn't be loaded
