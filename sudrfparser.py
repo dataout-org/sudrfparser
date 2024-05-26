@@ -460,24 +460,21 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
                             content = soup_case.find('div', {'class': 'contentt'})
 
-                            if content != None:
+                            if content == None:
 
+                                results_per_case = {"case_text": "", "case_found": "False"}
+                                # failed, try again
+                                tries_case += 1
+                                continue
+
+                            else:
                                 # getting case data
                                 results_per_case = _get_one_case_text_f1(soup_case)
-                                results_per_case["case_id_uid"] = case_id
-                                list_of_cases.append(results_per_case)
-
                                 # success
                                 break
 
-                            else:
-                                tries_case += 1
-                                results_per_case = {"case_text": "", "case_found": "False"}
-                                results_per_case["case_id_uid"] = case_id
-                                list_of_cases.append(results_per_case)
-
-                                # failed, try again
-                                continue
+                        results_per_case["case_id_uid"] = case_id
+                        list_of_cases.append(results_per_case)
 
                     if num_pages > 1:
 
@@ -520,24 +517,21 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                                             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
                                             content = soup_case.find('div', {'class': 'contentt'})
 
-                                            if content != None:
+                                            if content == None:
 
+                                                results_per_case = {"case_text": "", "case_found": "False"}
+                                                # failed, try again
+                                                tries_case += 1
+                                                continue
+
+                                            else:
                                                 # getting case data
                                                 results_per_case = _get_one_case_text_f1(soup_case)
-                                                results_per_case["case_id_uid"] = case_id
-                                                list_of_cases.append(results_per_case)
-
                                                 # success
                                                 break
 
-                                            else:
-                                                tries_case += 1
-                                                results_per_case = {"case_text": "", "case_found": "False"}
-                                                results_per_case["case_id_uid"] = case_id
-                                                list_of_cases.append(results_per_case)
-
-                                                # failed, try again
-                                                continue
+                                        results_per_case["case_id_uid"] = case_id
+                                        list_of_cases.append(results_per_case)
 
                             except WebDriverException:
                                 # recording the N of page that couldn't be loaded
