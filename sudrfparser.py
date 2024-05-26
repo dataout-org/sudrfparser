@@ -232,78 +232,68 @@ def _get_one_case_text_f1(soup) -> dict:
     metadata["accused"] = []
     metadata["id_text"] = ""
 
-    # trying to retrieve content 3 times
-    tries = 0
-    while tries <= 3:
+    content = soup.find('div', {'class': 'contentt'})
+    
+    ### checking if there's any content
 
-        content = soup.find('div', {'class': 'contentt'})
+    if content != None:
         
-        ### checking if there's any content
+        results["case_found"] = "True"
 
-        if content != None:
-            
-            results["case_found"] = "True"
+        ### getting the internal case ID
+        id_text = soup.find('div', {'class': 'casenumber'})
+        if id_text != None:
+            metadata["id_text"] = id_text.text.replace('\n',"").replace('\t',"")
 
-            ### getting the internal case ID
-            id_text = soup.find('div', {'class': 'casenumber'})
-            if id_text != None:
-                metadata["id_text"] = id_text.text.replace('\n',"").replace('\t',"")
+        ### case decision text
+        ###
+        # checking tabs
+        tabs = soup.find("ul", class_="tabs").find_all("li")
 
-            ### case decision text
+        for tab in tabs:
+            # getting the tab ID with the case text 
+            if " АКТЫ" in tab.text:
+                tab_id = tab.attrs['id'].replace('tab','cont')
+                results["case_text"] = content.find('div',{'id':tab_id}).text.replace('"','\'').replace('\xa0','')
+
+            ### accused info: names and articles
             ###
-            # checking tabs
-            tabs = soup.find("ul", class_="tabs").find_all("li")
-
-            for tab in tabs:
-                # getting the tab ID with the case text 
-                if " АКТЫ" in tab.text:
-                    tab_id = tab.attrs['id'].replace('tab','cont')
-                    results["case_text"] = content.find('div',{'id':tab_id}).text.replace('"','\'').replace('\xa0','')
-
-                ### accused info: names and articles
-                ###
-                if 'ЛИЦА' in tab.text:
-                    accused_list = []
-                    tab_id = tab.attrs['id'].replace('tab','cont')
-                    accused_content = content.find('div',{'id':tab_id}).find_all('tr')
-                    for tr in accused_content[2:]:
-                        accused_list.append({'name':tr.find_all('td')[0].text,\
-                                            'article':tr.find_all('td')[1].text.rstrip('УК РФ').split(';')})
-                    metadata["accused"] = accused_list
-                ###
+            if 'ЛИЦА' in tab.text:
+                accused_list = []
+                tab_id = tab.attrs['id'].replace('tab','cont')
+                accused_content = content.find('div',{'id':tab_id}).find_all('tr')
+                for tr in accused_content[2:]:
+                    accused_list.append({'name':tr.find_all('td')[0].text,\
+                                        'article':tr.find_all('td')[1].text.rstrip('УК РФ').split(';')})
+                metadata["accused"] = accused_list
             ###
+        ###
 
-            ### case metadata
-            ###
-            metadata_1 = content.find('div', {'id': 'cont1'})
-        
-            for tr in metadata_1.find('table').find_all('tr'):
-                # another case identifier
-                if 'идентификатор' in tr.text:
-                    metadata["uid_2"] = tr.find_all('td')[-1].text
-                # receipt date
-                if 'Дата поступления' in tr.text:
-                    metadata["adm_date"] = tr.find_all('td')[-1].text
-                # judge
-                if 'Судья' in tr.text:
-                    metadata["judge"] = tr.find_all('td')[-1].text
-                # case status
-                if 'Результат' in tr.text:
-                    metadata["decision_result"] = tr.find_all('td')[-1].text
-            ###   
+        ### case metadata
+        ###
+        metadata_1 = content.find('div', {'id': 'cont1'})
+    
+        for tr in metadata_1.find('table').find_all('tr'):
+            # another case identifier
+            if 'идентификатор' in tr.text:
+                metadata["uid_2"] = tr.find_all('td')[-1].text
+            # receipt date
+            if 'Дата поступления' in tr.text:
+                metadata["adm_date"] = tr.find_all('td')[-1].text
+            # judge
+            if 'Судья' in tr.text:
+                metadata["judge"] = tr.find_all('td')[-1].text
+            # case status
+            if 'Результат' in tr.text:
+                metadata["decision_result"] = tr.find_all('td')[-1].text
+        ###   
 
-            results["metadata"] = metadata
+        results["metadata"] = metadata
 
-            # success, stop trying
-            break
 
-        # no content found
-        else:
-            results["case_found"] = "False"
-
-            # try again
-            tries += 1
-            continue
+    # no content found
+    else:
+        results["case_found"] = "False"
 
     return results
 
