@@ -450,15 +450,13 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
                     for case_id in cases_ids_on_page:
 
                         case_page = f"{website}/modules.php?name=sud_delo&srv_num={server}&name_op=case&{case_id}&delo_id=1540006"
-                        browser.get(case_page)
 
                         # trying to retrieve case content
-
-                        tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
-
                         tries_case = 0
                         while tries_case <= 3:
 
+                            browser.get(case_page)
+                            tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
                             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
                             content = soup_case.find('div', {'class': 'contentt'})
 
@@ -512,15 +510,13 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
 
                                     for case_id in cases_ids_on_page:
                                         case_page = f"{website}/modules.php?name=sud_delo&srv_num={server}&name_op=case&{case_id}&delo_id=1540006"
-                                        browser.get(case_page)
 
                                         # trying to retrieve case content
-
-                                        tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
-
                                         tries_case = 0
                                         while tries_case <= 3:
 
+                                            browser.get(case_page)
+                                            tabs_content = _explicit_wait(browser,"CLASS_NAME","contentt",6)
                                             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
                                             content = soup_case.find('div', {'class': 'contentt'})
 
