@@ -8186,7 +8186,7 @@
         {
             "court_id": "52OS0000",
             "court_name": "Нижегородский областной суд (Нижегородская область)",
-            "court_website": "http://nnoblsud.ru",
+            "court_website": "http://oblsud.nnov.sudrf.ru",
             "srv": [
                 "1"
             ]
@@ -16374,7 +16374,7 @@
             "court_name": "Московский районный суд г. Твери (Тверская область)",
             "court_website": "http://moskovsky.twr.sudrf.ru",
             "srv": [
-                "1"
+                "3"
             ]
         },
         {
