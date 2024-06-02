@@ -781,9 +781,10 @@ def _get_captcha_f2(browser,website:str,autocaptcha="") -> str:
     return captcha_addition
 
 
-def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False, autocaptcha="") -> dict:
+def _get_cases_texts_f2(browser, website:str, region:str, court_code:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False, autocaptcha="") -> dict:
     '''
     Getting all court cases on one website in the indicated date range
+    browser: reusing browser for form2, because it has JavaScript and images on
     website: str, website address;
     region: str, region code; 
     court_code: str, required for form2 websites; to retrieve the codes, use 'https://raw.githubusercontent.com/dataout-org/sudrfparser/main/courts_info/sudrf_websites.json';
@@ -799,8 +800,6 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
     Saves json files with all parsed cases per website's server (for example, if there are 2 servers on one website, there will be 2 json files); Logs errors and pages that were not parsed;
     Returns a dict with info about N cases found per server
     '''
-
-    browser = _set_browser(path_to_driver)
 
     year = start_date.split('.')[-1]
     return_dict = {website:{"year":year,"n_cases_by_server":{}}}
@@ -855,22 +854,31 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
                     for case_id in cases_ids_on_page:
 
                         case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
-                        browser.get(case_page)
-                        # checking if tabs are loaded
-                        el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
+                        
+                        # trying to retrieve case content
+                        tries_case = 0
+                        while tries_case <= 3:
 
-                        if el_found == True:
+                            browser.get(case_page)
+                            # checking if tabs are loaded
+                            tabs_content = _explicit_wait(browser,"ID","case_bookmarks",6)
                             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-                            # getting case data
-                            results_per_case = _get_one_case_text_f2(soup_case) 
-                            results_per_case["case_id_uid"] = case_id
-                            list_of_cases.append(results_per_case)
+                            content = soup_case.find('ul', {'class': 'bookmarks'})
 
-                        else:
-                            results_per_case = {}
-                            results_per_case["case_found"] = "False"
-                            results_per_case["case_id_uid"] = case_id
-                            list_of_cases.append(results_per_case)
+                            if content == None:
+                                results_per_case = {"case_text": "", "case_found": "False"}
+                                # failed, try again
+                                tries_case += 1
+                                continue
+
+                            else:
+                                # getting case data
+                                results_per_case = _get_one_case_text_f2(soup_case)
+                                # success
+                                break
+
+                        results_per_case["case_id_uid"] = case_id
+                        list_of_cases.append(results_per_case)
 
                     if num_pages > 1:
 
@@ -906,21 +914,30 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
                                     for case_id in cases_ids_on_page:
 
                                         case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
-                                        browser.get(case_page)
 
-                                        # checking if tabs are loaded
-                                        el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
-                                        if el_found == True:
+                                        tries_case = 0
+                                        while tries_case <= 3:
+
+                                            browser.get(case_page)
+                                            # checking if tabs are loaded
+                                            tabs_content = _explicit_wait(browser,"ID","case_bookmarks",6)
                                             soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-                                            # getting case data
-                                            results_per_case = _get_one_case_text_f2(soup_case)
-                                            results_per_case["case_id_uid"] = case_id
-                                            list_of_cases.append(results_per_case)
-                                        else:
-                                            results_per_case = {}
-                                            results_per_case["case_found"] = "False"
-                                            results_per_case["case_id_uid"] = case_id
-                                            list_of_cases.append(results_per_case)
+                                            content = soup_case.find('ul', {'class': 'bookmarks'})
+
+                                            if content == None:
+                                                results_per_case = {"case_text": "", "case_found": "False"}
+                                                # failed, try again
+                                                tries_case += 1
+                                                continue
+  
+                                            else:
+                                                # getting case data
+                                                results_per_case = _get_one_case_text_f2(soup_case)
+                                                # success
+                                                break
+
+                                        results_per_case["case_id_uid"] = case_id
+                                        list_of_cases.append(results_per_case)
 
                             except WebDriverException:
                                 # recording the N of page that couldn't be loaded
@@ -970,8 +987,6 @@ def _get_cases_texts_f2(website:str, region:str, court_code:str, start_date:str,
             json.dump(results_per_site, jf, ensure_ascii=False)
 
         return_dict[website]["n_cases_by_server"][server] = num_cases
-
-    browser.close()
 
     return return_dict
 
@@ -1029,10 +1044,10 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
 
                 # parser for form2
                 if form_type == "form2" and captcha == "False":
-                    results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save)
+                    results = _get_cases_texts_f2(browser, website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save)
 
                 if form_type == "form2" and captcha == "True":
-                    results = _get_cases_texts_f2(website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True, autocaptcha=apikey)
+                    results = _get_cases_texts_f2(browser, website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, captcha=True, autocaptcha=apikey)
 
                 # no point in trying because websites with other forms are not parsed
                 if form_type == "other":
