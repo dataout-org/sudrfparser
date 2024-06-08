@@ -1206,7 +1206,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                 r = requests.get(court_codes_url)
                 court_codes = r.json()
 
-                for court in court_codes[region]:
+                for court in court_codes[region_code]:
                     if court["court_website"] == website:
                         court_code = court["court_id"]
 
