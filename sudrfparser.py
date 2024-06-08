@@ -1185,6 +1185,12 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                     
                     case_page = f"{website}/modules.php?name=sud_delo&srv_num={srv}&name_op=case&{case_id}&delo_id=1540006"
                     browser.get(case_page)
+
+                    # checking if tabs are loaded
+                    tabs_content = _explicit_wait(browser,"CLASS_NAME","tabs",6)
+                    # debugging
+                    print(tabs_content)
+
                     soup_case = BeautifulSoup(browser.page_source, 'html.parser')
 
                     # getting case data
