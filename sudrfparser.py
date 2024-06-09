@@ -1143,7 +1143,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
         
         try:
             browser.get(link_to_site)
-            time.sleep(3)
+            content_found = _explicit_wait(browser,"ID","modSdpContent",6)
 
             soup = BeautifulSoup(browser.page_source, 'html.parser')
 
@@ -1169,6 +1169,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                     
                     try:
                         browser.get(link_with_page)
+                        content_found = _explicit_wait(browser,"ID","tablcont",6)
                         soup = BeautifulSoup(browser.page_source, 'html.parser')
                         
                         if soup.find("table", {"id": "tablcont"}):
@@ -1188,13 +1189,15 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
 
                     # checking if tabs are loaded
                     tabs_content = _explicit_wait(browser,"CLASS_NAME","tabs",6)
-                    # debugging
-                    print(tabs_content)
 
-                    soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                    if tabs_content == True:
+                        # getting case data
+                        soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                        results_per_case = _get_one_case_text_f1(soup_case)
+                        
+                    else:
+                        results_per_case = {"case_text": "", "case_found": "False"}
 
-                    # getting case data
-                    results_per_case = _get_one_case_text_f1(soup_case)
                     results_per_case["case_id_uid"] = case_id
                     new_cases_data.append(results_per_case)
 
@@ -1243,15 +1246,20 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                     browser.get(case_page)
 
                     # checking if tabs are loaded
-                    el_found = _explicit_wait(browser,"ID","case_bookmarks",6)
+                    tabs_content = _explicit_wait(browser,"ID","case_bookmarks",6)
 
-                    soup_case = BeautifulSoup(browser.page_source, 'html.parser')
-                    # getting case data
-                    results_per_case = _get_one_case_text_f2(soup_case)
+                    if tabs_content == True:
+                        # getting case data
+                        soup_case = BeautifulSoup(browser.page_source, 'html.parser')
+                        results_per_case = _get_one_case_text_f2(soup_case)
+                    else:
+                        results_per_case = {"case_text": "", "case_found": "False"}
+
                     results_per_case["case_id_uid"] = case_id
                     new_cases_data.append(results_per_case)
                     
                 
+        # this will add all non-requested pages per website to the pagination error list
         except WebDriverException:
             not_parsed_pages = pages_to_reguest
             continue
