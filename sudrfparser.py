@@ -319,7 +319,9 @@ def captcha_solver(config:dict,base64Image:str) -> str:
             result = solver.normal(img_data, numeric=config['numeric'],
                                    minLen=config['minLen'],
                                    maxLen=config['maxLen'],
-                                   phrase=config['phrase'])
+                                   phrase=config['phrase'],
+                                   case=config['case'],
+                                   comment=config['comment'])
         except:
             tries += 1
             continue
@@ -364,8 +366,8 @@ def _get_captcha_f1(browser,website:str,captcha_config={}) -> str:
             if len(captcha_config) != 0:
                 captcha_guessed = captcha_solver(captcha_config,imgstring)
 
-                # failed (more than 5 symbols or no pattern with 5 numbers), enter captcha manually
-                if len(captcha_guessed) != 5 or re.search('\d{5}',captcha_guessed) == None:
+                # failed, enter captcha manually
+                if captcha_guessed == "":
 
                     print("Autorecognition of captcha failed. Enter captcha manually")
                     # enlarging the captcha image
@@ -782,8 +784,8 @@ def _get_captcha_f2(browser,website:str,captcha_config={}) -> str:
             if len(captcha_config) != 0:
                 captcha_guessed = captcha_solver(captcha_config,imgstring)
 
-                # failed (more than 5 symbols or no pattern with 5 numbers), enter captcha manually
-                if len(captcha_guessed) != 5 or re.search('\d{5}',captcha_guessed) == None:
+                # failed, enter captcha manually
+                if captcha_guessed == "":
 
                     print("Autorecognition of captcha failed. Enter captcha manually")
                     # enlarging the captcha image
