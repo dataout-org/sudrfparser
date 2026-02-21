@@ -1626,7 +1626,7 @@ def _get_adm_cases_f2(browser, website:str, region:str, court_code:str, start_da
 
 # criminal cases #
 
-def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, court_code="", srv_num=['1'], path_to_save="", captcha_config={}):
+def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, court_code="", srv_num=['1'], articles=[],path_to_save="", captcha_config={}):
     '''
     Getting texts of court decisions with metadata on one website for the indicated date range
     region: str, region code; use keys in 'https://github.com/dataout-org/sudrfparser/blob/main/courts_info/sudrf_websites.json'
@@ -1637,6 +1637,7 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
     path_to_driver: str, path to Chrome driver;
     court_code: str, required for form2 websites; to retrieve the codes, use 'https://raw.githubusercontent.com/dataout-org/sudrfparser/main/courts_info/sudrf_websites.json'; default '';
     srv_num: list, servers where to look for cases, default ['1']; one website can have multiple servers with criminal cases of the first instance;
+    articles: list, a list of criminal articles (str) to search for; default []; !NB the format should be the following: ['105','158','161'] (an example), where '105' is the article number according to the Criminal Code; querying a single article includes its all parts and clauses;
     path_to_save: str, path where to save the results, default '' (the same directory of the script execution; note that there can be a lot of large json files);
     captcha_config: dict, info to get captcha automatically, default {}; keep default if entering captcha manually;
     Saves json files with all parsed cases per website's server (for example, if there are 2 servers on one website, there will be 2 json files); Logs errors and pages that were not parsed;
@@ -1670,17 +1671,17 @@ def get_cases(website:str, region:str, start_date:str, end_date:str, path_to_dri
 
                 # parser for form1
                 if form_type == "form1" and captcha == "False":
-                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save)
+                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, articles, path_to_save)
 
                 if form_type == "form1" and captcha == "True":
-                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, path_to_save, True, captcha_config)
+                    results = _get_cases_texts_f1(website, region, start_date, end_date, path_to_driver, srv_num, articles, path_to_save, True, captcha_config)
 
                 # parser for form2
                 if form_type == "form2" and captcha == "False":
-                    results = _get_cases_texts_f2(browser, website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save)
+                    results = _get_cases_texts_f2(browser, website, region, court_code, start_date, end_date, path_to_driver, srv_num, articles, path_to_save)
 
                 if form_type == "form2" and captcha == "True":
-                    results = _get_cases_texts_f2(browser, website, region, court_code, start_date, end_date, path_to_driver, srv_num, path_to_save, True, captcha_config)
+                    results = _get_cases_texts_f2(browser, website, region, court_code, start_date, end_date, path_to_driver, srv_num, articles, path_to_save, True, captcha_config)
 
                 # no point in trying because websites with other forms are not parsed
                 if form_type == "other":
