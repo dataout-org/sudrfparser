@@ -394,7 +394,7 @@ def _get_captcha_f1(browser,website:str,captcha_config={}) -> str:
             
     return captcha_addition
 
-def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False, captcha_config={}) -> dict:
+def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], articles=[], path_to_save='', captcha=False, captcha_config={}) -> dict:
     '''
     Getting all court cases on one website in the indicated date range
     website: str, website address;
@@ -405,6 +405,7 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
         end_date: str, date of cases registration in a court, 'DD.MM.YYYY';
     path_to_driver: str, path to Chrome driver;
     srv_num: list, servers where to look for cases, default ['1']; one website can have multiple servers with criminal cases of the first instance;
+    articles: list, a list of criminal articles (str) to search for; default []; !NB the format should be the following: ['105','158','161'] (an example), where '105' is the article number according to the Criminal Code; querying a single article includes its all parts and clauses;
     path_to_save: str, path where to save the results, default '' (the same directory of the script execution);
     captcha: bool, if a website has captcha protection, default False;
     captcha_config: dict, info to get captcha automatically, default {}; keep default if entering captcha manually 
@@ -427,7 +428,18 @@ def _get_cases_texts_f1(website:str, region:str, start_date:str, end_date:str, p
         list_of_cases = []
         logs = {}
 
-        module_form1 = f'/modules.php?name=sud_delo&srv_num={server}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__ENTRY_DATE1D={start_date}&u1_case__ENTRY_DATE2D={end_date}&delo_table=u1_case&U1_PARTS__PARTS_TYPE='
+        # checking articles
+        if len(articles) > 0:
+            # putting all articles into the url
+            url_articles = ""
+            for a in articles:
+                url_articles += f"&lawbookarticles%5B%5D={a}"
+
+            module_form1 = f'/modules.php?name=sud_delo&srv_num={server}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__ENTRY_DATE1D={start_date}&u1_case__ENTRY_DATE2D={end_date}&delo_table=u1_case&U1_DEFENDANT__LAW_ARTICLESS={url_articles}&U1_PARTS__PARTS_TYPE='
+        
+        # request url without specified articles
+        else:
+            module_form1 = f'/modules.php?name=sud_delo&srv_num={server}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__ENTRY_DATE1D={start_date}&u1_case__ENTRY_DATE2D={end_date}&delo_table=u1_case&U1_PARTS__PARTS_TYPE='
 
         link_to_site = website + module_form1
 
@@ -801,7 +813,7 @@ def _get_captcha_f2(browser,website:str,captcha_config={}) -> str:
     return captcha_addition
 
 
-def _get_cases_texts_f2(browser, website:str, region:str, court_code:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], path_to_save='', captcha=False, captcha_config={}) -> dict:
+def _get_cases_texts_f2(browser, website:str, region:str, court_code:str, start_date:str, end_date:str, path_to_driver:str, srv_num=['1'], articles=[], path_to_save='', captcha=False, captcha_config={}) -> dict:
     '''
     Getting all court cases on one website in the indicated date range
     browser: reusing browser for form2, because it has JavaScript and images on
@@ -814,6 +826,7 @@ def _get_cases_texts_f2(browser, website:str, region:str, court_code:str, start_
         end_date: str, date of cases registration in a court, 'DD.MM.YYYY';
     path_to_driver: str, path to Chrome driver;
     srv_num: list, servers where to look for cases, default ['1']; one website can have multiple servers with criminal cases of the first instance;
+    articles: list, a list of criminal articles (str) to search for; default []; !NB the format should be the following: ['105','158','161'] (an example), where '105' is the article number according to the Criminal Code; querying a single article includes its all parts and clauses;
     path_to_save: str, path where to save the results, default '' (the same directory of the script execution);
     captcha: bool, if a website has captcha protection, default False;
     captcha_config: dict, info to get captcha automatically, default {};
@@ -832,8 +845,18 @@ def _get_cases_texts_f2(browser, website:str, region:str, court_code:str, start_
         list_of_cases = []
         logs = {}
 
-        # case__num_build coincides with server num
-        module_form2 = f"/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_code}&case__num_build={server}&case__case_numberss=&case__judicial_uidss=&parts__namess=&case__entry_date1d={start_date}&case__entry_date2d={end_date}"
+        # checking articles
+        if len(articles) > 0:
+            # putting all articles into the url
+            url_articles = ""
+            for a in articles:
+                url_articles += f"&lawbookarticles%5B%5D={a}"
+
+            module_form2 = f"/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_code}&case__num_build={server}&case__case_numberss=&case__judicial_uidss=&parts__namess=&case__entry_date1d={start_date}&case__entry_date2d={end_date}&parts__law_articless={url_articles}"
+
+        else:
+            # case__num_build coincides with server num
+            module_form2 = f"/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_code}&case__num_build={server}&case__case_numberss=&case__judicial_uidss=&parts__namess=&case__entry_date1d={start_date}&case__entry_date2d={end_date}"
 
         link_to_site = website + module_form2
 
