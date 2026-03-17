@@ -1,0 +1,3 @@
+# sudrfparser.py TO DO
+
+1. Add request params string to "logs", so that it is clear what request was used for each website; and it'll be easier to use .request_missing_pages();
