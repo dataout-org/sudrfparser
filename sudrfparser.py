@@ -1822,15 +1822,18 @@ def _get_missing_pages(dir_path:str,region_code:str,year:str) -> tuple:
     return (n_missed_pages,sites_with_pagination_errors)
 
 
-def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:str,captcha_config={}) -> list:
+def request_missing_pages(dir_path:str,region_code:str,year:str,start_date:str,end_date:str,path_to_driver:str,articles=[],captcha_config={}) -> list:
     '''
     Handling missing pages by region and year: checking whether the result json files have missing pages and requesting cases on them;
     This function adds missing cases to the same resulting file (it overwrites files);
     dir_path: str, path to the directory with the json files of parsed cases;
     region_code: str, region code in the results json files, for which to check missing pages;
     year: str, year in the results json files, for which to check missing pages;
+    start_date: str, date of cases registration in a court, 'DD.MM.YYYY';
+    end_date: str, date of cases registration in a court, 'DD.MM.YYYY';
     (for example, the file '50_chehov_mo_1_2019.json' has the region code '50' and the year is '2019')
     path_to_driver: str, path to Chrome driver;
+    articles: list, a list of criminal articles (str) to search for; default []; !NB the format should be the following: ['105','158','161'] (an example), where '105' is the article number according to the Criminal Code; querying a single article includes its all parts and clauses;
     captcha_config: dict, info to get captcha automatically, default {}; keep default if entering captcha manually
     Returns a list with logs of N cases added per file
     '''
@@ -1841,7 +1844,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
     for site in missing_pages[1]:
     
         # getting srv info from the file name
-        srv = site.split("_")[-2]
+        server = site.split("_")[-2]
         
         file_path = f"{dir_path}/{site}"
         
@@ -1853,7 +1856,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
         pages_to_reguest = site_data[website]["logs"]["pagination_error"]
         
         browser = _set_browser(path_to_driver)
-        link_to_site = website + f"/modules.php?name=sud_delo&srv_num={srv}&name_op=sf&delo_id=1540005"
+        link_to_site = website + f"/modules.php?name=sud_delo&srv_num={server}&name_op=sf&delo_id=1540005"
         
         all_cases_per_site_to_request = []
         not_parsed_pages = []
@@ -1872,9 +1875,19 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
             # form1
             if form_type == "form1":
                 
-                module = f'/modules.php?name=sud_delo&srv_num={srv}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__ENTRY_DATE1D=01.01.{year}&u1_case__ENTRY_DATE2D=31.12.{year}&delo_table=u1_case&U1_PARTS__PARTS_TYPE='
+                if len(articles) > 0:
+                    # putting all articles into the url
+                    url_articles = ""
+                    for a in articles:
+                        url_articles += f"&lawbookarticles%5B%5D={a}"
+
+                    module_form1 = f'/modules.php?name=sud_delo&srv_num={server}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__ENTRY_DATE1D={start_date}&u1_case__ENTRY_DATE2D={end_date}&delo_table=u1_case&U1_DEFENDANT__LAW_ARTICLESS={url_articles}&U1_PARTS__PARTS_TYPE='
                 
-                link_to_site = website + module
+                # request url without specified articles
+                else:
+                    module_form1 = f'/modules.php?name=sud_delo&srv_num={server}&name_op=r&delo_id=1540006&case_type=0&new=0&u1_case__ENTRY_DATE1D={start_date}&u1_case__ENTRY_DATE2D={end_date}&delo_table=u1_case&U1_PARTS__PARTS_TYPE='
+                
+                link_to_site = website + module_form1
 
                 # check captcha
                 if captcha == "True":
@@ -1902,7 +1915,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                 # getting all cases data by their IDs
                 for case_id in all_cases_per_site_to_request:
                     
-                    case_page = f"{website}/modules.php?name=sud_delo&srv_num={srv}&name_op=case&{case_id}&delo_id=1540006"
+                    case_page = f"{website}/modules.php?name=sud_delo&srv_num={server}&name_op=case&{case_id}&delo_id=1540006"
                     browser.get(case_page)
 
                     # checking if tabs are loaded
@@ -1931,7 +1944,18 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                     if court["court_website"] == website:
                         court_code = court["court_id"]
 
-                module_form2 = f'/modules.php?name_op=r&name=sud_delo&srv_num={srv}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_code}&case__num_build={srv}&case__case_numberss=&case__judicial_uidss=&parts__namess=&case__entry_date1d=01.01.{year}&case__entry_date2d=31.12.{year}'
+                # checking articles
+                if len(articles) > 0:
+                    # putting all articles into the url
+                    url_articles = ""
+                    for a in articles:
+                        url_articles += f"&lawbookarticles%5B%5D={a}"
+
+                    module_form2 = f"/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_code}&case__num_build={server}&case__case_numberss=&case__judicial_uidss=&parts__namess=&case__entry_date1d={start_date}&case__entry_date2d={end_date}&parts__law_articless={url_articles}"
+
+                else:
+                    # case__num_build coincides with server num
+                    module_form2 = f"/modules.php?name_op=r&name=sud_delo&srv_num={server}&_deloId=1540006&case__case_type=0&_new=0&case__vnkod={court_code}&case__num_build={server}&case__case_numberss=&case__judicial_uidss=&parts__namess=&case__entry_date1d={start_date}&case__entry_date2d={end_date}"
 
                 link_to_site = website + module_form2
 
@@ -1960,7 +1984,7 @@ def request_missing_pages(dir_path:str,region_code:str,year:str,path_to_driver:s
                 # getting all cases data by their IDs
                 for case_id in all_cases_per_site_to_request:
 
-                    case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={srv}"
+                    case_page = f"{website}/modules.php?name=sud_delo&name_op=case&{case_id}&_deloId=1540006&_caseType=0&_new=0&srv_num={server}"
                     browser.get(case_page)
 
                     # checking if tabs are loaded
